@@ -1,0 +1,51 @@
+#
+# Copyright 2015 org.NLP4L
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET           /                                         @org.nlp4l.ltr.support.controllers.LtrDashboard.index(ltrid: Int = 0)
+
+# Map static resources from the /public folder to the /assets URL path
+GET           /assets/*file                             controllers.Assets.versioned(path="/public", file: Asset)
+GET           /webjars/*file                            controllers.WebJarAssets.at(file)
+
+
+# framework
+GET           /ltrdashboard                                            @org.nlp4l.ltr.support.controllers.LtrDashboard.index(ltrid: Int = 0)
+GET           /ltrdashboard/$ltrid<[0-9]+>                             @org.nlp4l.ltr.support.controllers.LtrDashboard.index(ltrid: Int)
+GET           /ltrdashboard/config                                     @org.nlp4l.ltr.support.controllers.LtrDashboard.config(ltrid: Int = 0)
+GET           /ltrdashboard/$ltrid<[0-9]+>/config                      @org.nlp4l.ltr.support.controllers.LtrDashboard.config(ltrid: Int)
+GET           /ltrdashboard/$ltrid<[0-9]+>/config/$target<[0-9]+>      @org.nlp4l.ltr.support.controllers.LtrDashboard.editConfig(ltrid: Int, target: Int)
+GET           /ltrdashboard/config/new                                 @org.nlp4l.ltr.support.controllers.LtrDashboard.newConfig(ltrid: Int = 0)
+GET           /ltrdashboard/$ltrid<[0-9]+>/config/new                  @org.nlp4l.ltr.support.controllers.LtrDashboard.newConfig(ltrid: Int)
+GET           /ltrdashboard/$ltrid<[0-9]+>/query                       @org.nlp4l.ltr.support.controllers.LtrDashboard.query(ltrid: Int)
+GET           /ltrdashboard/$ltrid<[0-9]+>/supervise                   @org.nlp4l.ltr.support.controllers.LtrDashboard.supervise(ltrid: Int)
+GET           /ltrdashboard/$ltrid<[0-9]+>/feature                     @org.nlp4l.ltr.support.controllers.LtrDashboard.feature(ltrid: Int)
+GET           /ltrdashboard/$ltrid<[0-9]+>/model                       @org.nlp4l.ltr.support.controllers.LtrDashboard.model(ltrid: Int)
+
+
+
+
+POST          /ltr/config                                              @org.nlp4l.ltr.support.controllers.LtrController.saveLtrConfig(ltrid: Int = 0)
+POST          /ltr/config/$ltrid<[0-9]+>                               @org.nlp4l.ltr.support.controllers.LtrController.saveLtrConfig(ltrid: Int)
+DELETE        /ltr/config/$ltrid<[0-9]+>                               @org.nlp4l.ltr.support.controllers.LtrController.deleteLtrConfig(ltrid: Int)
+POST          /ltr/query/$ltrid<[0-9]+>                                @org.nlp4l.ltr.support.controllers.LtrController.saveQuery(ltrid: Int)
+GET           /ltr/feature/$ltrid<[0-9]+>                              @org.nlp4l.ltr.support.controllers.LtrController.startFeatureEtraction(ltrid: Int)
+GET           /ltr/feature/$ltrid<[0-9]+>/progress                     @org.nlp4l.ltr.support.controllers.LtrController.getFeatureProgress(ltrid: Int)
+GET           /ltr/feature/$ltrid<[0-9]+>/clear                        @org.nlp4l.ltr.support.controllers.LtrController.clearFeatureProgress(ltrid: Int)
