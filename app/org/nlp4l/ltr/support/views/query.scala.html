@@ -1,7 +1,7 @@
 @import org.nlp4l.ltr.support.models._
 @(currentLtrid: Int, menubars: Seq[Menubar], ltr: Option[Ltrconfig], success: String, error: String)
 @headerAddon = {
-
+<script src="@routes.Assets.versioned("javascripts/ltr/support/query.js")" type="text/javascript"></script>
 }
 
 <!--
@@ -55,8 +55,26 @@
       </form>
 
     <div class="row">
-      <div class="col-md-12 main">
-         QUERY TABLE // TODO
+      <div class="col-sm-9 col-md-10 main">
+        <h1 class="page-header">Query List</h1>
+
+        <table id="table"
+           data-toggle="table"
+           data-pagination="true"
+           data-pagination-first-text="First"
+           data-pagination-pre-text="Prev"
+           data-pagination-next-text="Next"
+           data-pagination-last-text="Last"
+           data-id-field="qid"
+           data-side-pagination="server"
+           data-url="/ltr/query/@currentLtrid/list">
+          <thead>
+            <tr>
+              <th class="col-xs-1" data-field="qid" data-sortable="true">qid</th>
+              <th data-field="query" data-sortable="true">Query</th>
+            </tr>
+          </thead>
+        </table>
       </div>
     </div>
   </div>

@@ -16,6 +16,10 @@
 
 package org.nlp4l.ltr.support.controllers
 
+import java.util.UUID
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.io.File
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.convert.WrapAsScala._
 import scala.concurrent.Await
@@ -35,6 +39,7 @@ import org.nlp4l.ltr.support.dao.LtrsuperviseDAO
 import org.nlp4l.ltr.support.models.ActionResult
 import org.nlp4l.ltr.support.models.DbModels._
 import org.nlp4l.ltr.support.models.Ltrconfig
+import org.nlp4l.ltr.support.models.Ltrquery
 import org.nlp4l.ltr.support.models.ViewModels._
 import com.google.inject.name.Named
 import akka.actor.ActorRef
@@ -120,14 +125,48 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
       case e => InternalServerError("Delete failed. " + e.getMessage)
     }
   }
-  
-  
-  def saveQuery(ltrid: Int) = Action {
-    // TODO
-    Ok(Json.toJson(ActionResult(true, Seq("success"))))
+
+
+  def saveQuery(ltrid: Int) = Action(parse.multipartFormData) { request =>
+    request.body.file("query") map { file =>
+      val uuid = UUID.randomUUID().toString
+      val temp = new File(s"/tmp/$uuid")
+      file.ref.moveTo(temp, replace = true)
+      val tempPath = Paths.get(temp.getAbsolutePath)
+      val lines = Files.readAllLines(tempPath).toList
+      lines.foreach( l => {
+        val ltrquery = Ltrquery(None, l, ltrid, false)
+        ltrqueryDAO.insert(ltrquery)
+      })
+    }
+    Redirect("/ltrdashboard/" + ltrid + "/query")
   }
-  
-  
+
+  def listQuery(ltrid: Int) = Action { request =>
+    val offset = request.getQueryString("offset") match {
+      case Some(x) if x != "" => x.toInt
+      case _ => 0
+    }
+    val size = request.getQueryString("limit") match {
+      case Some(x) => x.toInt
+      case _ => 10
+    }
+    val sort = request.getQueryString("sort") match {
+      case Some(c) => c
+    }
+    val order = request.getQueryString("order") match {
+      case Some(c) => c
+      case _ => "asc"
+    }
+    val total = ltrqueryDAO.totalCountByLtrid(ltrid)
+    val res = ltrqueryDAO.fetchByLtrid(ltrid, sort, order, offset, size)
+    val jsonResponse = Json.obj(
+      "total" -> total,
+      "rows" -> Json.toJson(res)
+    )
+    Ok(jsonResponse)
+  }
+
   def startFeatureEtraction(ltrid: Int) = Action {
     progressActor ! StartMsg_Feature(ltrid)
     Ok(Json.toJson(ActionResult(true, Seq("started"))))

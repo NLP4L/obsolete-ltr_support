@@ -19,16 +19,15 @@
  */
 package org.nlp4l.ltr.support.dao
 
-import scala.concurrent.Future
-
+import scala.concurrent.{Await, Future}
 import org.nlp4l.ltr.support.models.Ltrquery
-
 import javax.inject.Inject
 import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.db.slick.HasDatabaseConfigProvider
 import slick.driver.JdbcProfile
 import slick.lifted.ProvenShape.proveShapeOf
+import javax.inject.Inject
 
 
 
@@ -86,7 +85,29 @@ class LtrqueryDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
     }
   }
 
-  
-  
+  def fetchByLtrid(ltrid: Int, sort: String = "qid", order: String= "asc", offset: Int = 0, size: Int = 10): Seq[Ltrquery] = {
+    val res = sort match {
+      case "query" =>
+        order match {
+          case "asc" =>
+            db.run(ltrqueries.filter(_.ltrid === ltrid).sortBy(_.query.asc).drop(offset).take(size).result)
+          case "desc" =>
+            db.run(ltrqueries.filter(_.ltrid === ltrid).sortBy(_.query.desc).drop(offset).take(size).result)
+        }
+      case _ => {
+        order match {
+          case "asc" =>
+            db.run(ltrqueries.filter(_.ltrid === ltrid).sortBy(_.qid.asc).drop(offset).take(size).result)
+          case "desc" =>
+            db.run(ltrqueries.filter(_.ltrid === ltrid).sortBy(_.qid.desc).drop(offset).take(size).result)
+        }
+      }
+    }
+    Await.result(res, scala.concurrent.duration.Duration.Inf)
+  }
 
+  def totalCountByLtrid(ltrid: Int): Int = {
+    val res = db.run(ltrqueries.filter(_.ltrid === ltrid).length.result)
+    Await.result(res, scala.concurrent.duration.Duration.Inf)
+  }
 }

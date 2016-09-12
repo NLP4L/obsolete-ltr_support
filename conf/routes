@@ -46,6 +46,7 @@ POST          /ltr/config                                              @org.nlp4
 POST          /ltr/config/$ltrid<[0-9]+>                               @org.nlp4l.ltr.support.controllers.LtrController.saveLtrConfig(ltrid: Int)
 DELETE        /ltr/config/$ltrid<[0-9]+>                               @org.nlp4l.ltr.support.controllers.LtrController.deleteLtrConfig(ltrid: Int)
 POST          /ltr/query/$ltrid<[0-9]+>                                @org.nlp4l.ltr.support.controllers.LtrController.saveQuery(ltrid: Int)
+GET           /ltr/query/$ltrid<[0-9]+>/list                           @org.nlp4l.ltr.support.controllers.LtrController.listQuery(ltrid: Int)
 GET           /ltr/feature/$ltrid<[0-9]+>                              @org.nlp4l.ltr.support.controllers.LtrController.startFeatureEtraction(ltrid: Int)
 GET           /ltr/feature/$ltrid<[0-9]+>/progress                     @org.nlp4l.ltr.support.controllers.LtrController.getFeatureProgress(ltrid: Int)
 GET           /ltr/feature/$ltrid<[0-9]+>/clear                        @org.nlp4l.ltr.support.controllers.LtrController.clearFeatureProgress(ltrid: Int)
