@@ -153,6 +153,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     }
     val sort = request.getQueryString("sort") match {
       case Some(c) => c
+      case _ => "qid"
     }
     val order = request.getQueryString("order") match {
       case Some(c) => c
