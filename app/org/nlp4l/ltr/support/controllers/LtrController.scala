@@ -136,7 +136,8 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
       val lines = Files.readAllLines(tempPath).toList
       lines.foreach( l => {
         val ltrquery = Ltrquery(None, l, ltrid, false)
-        ltrqueryDAO.insert(ltrquery)
+        val f = ltrqueryDAO.insert(ltrquery)
+        Await.ready(f, scala.concurrent.duration.Duration.Inf)
       })
     }
     Redirect("/ltrdashboard/" + ltrid + "/query")
