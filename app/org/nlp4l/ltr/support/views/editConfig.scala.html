@@ -79,17 +79,17 @@
           	</div><!-- row -->
           	<div class="row">
           		<div class="form-group">
-          			<label class="col-sm-2 control-label" for="superviseType">Supervise Type</label>
+          			<label class="col-sm-2 control-label" for="annotationType">Annotation Type</label>
           			<div class="col-sm-10">
-          				<select class="form-control" id="superviseType" required >
-          					<option value="pointwise"　@if(ltr.map(d => d.superviseType).getOrElse("") == "pointwise") { selected }>pointwise</option>
+          				<select class="form-control" id="annotationType" required >
+          					<option value="pointwise"　@if(ltr.map(d => d.annotationType).getOrElse("") == "pointwise") { selected }>pointwise</option>
           				</select>
           			</div>
           		</div>
           	</div><!-- row -->
           	<div class="row">
           		<div class="form-group">
-          			<label class="col-sm-2 control-label" for="labelMax">Supervise Label</label>
+          			<label class="col-sm-2 control-label" for="labelMax">Annotation Label</label>
           			<div class="col-sm-10">
           				<select class="form-control" id="labelMax" required >
           					<option value="1" @if(ltr.map(d => d.labelMax).getOrElse("") == 1) { selected }>0 to 1</option>

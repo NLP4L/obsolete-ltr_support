@@ -30,7 +30,7 @@ import org.joda.time.format.DateTimeFormat
 case class Ltrconfig (
     ltrid: Option[Int], 
     name: String, 
-    superviseType: String,
+    annotationType: String,
     modelFactryClassName: String,
     modelFactoryClassSettings: Option[String],
     searchUrl: String,
@@ -86,9 +86,9 @@ case class Ltrmodel (
 
 
 /**
- * ltrsupervise Table
+ * ltrannotation Table
  */
-case class Ltrsupervise (
+case class Ltrannotation (
     qid: Int,
     docid: String,
     label: Int
@@ -103,7 +103,7 @@ object DbModels {
       Json.obj(
         "ltrid" -> d.ltrid,
         "name" -> d.name,
-        "superviseType" -> d.superviseType,
+        "annotationType" -> d.annotationType,
         "modelFactryClassName" -> d.modelFactryClassName,
         "modelFactoryClassSettings" -> d.modelFactoryClassSettings,
         "searchUrl" -> d.searchUrl,

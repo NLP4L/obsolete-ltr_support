@@ -35,7 +35,7 @@ GET           /ltrdashboard/$ltrid<[0-9]+>/config/$target<[0-9]+>      @org.nlp4
 GET           /ltrdashboard/config/new                                 @org.nlp4l.ltr.support.controllers.LtrDashboard.newConfig(ltrid: Int = 0)
 GET           /ltrdashboard/$ltrid<[0-9]+>/config/new                  @org.nlp4l.ltr.support.controllers.LtrDashboard.newConfig(ltrid: Int)
 GET           /ltrdashboard/$ltrid<[0-9]+>/query                       @org.nlp4l.ltr.support.controllers.LtrDashboard.query(ltrid: Int)
-GET           /ltrdashboard/$ltrid<[0-9]+>/supervise                   @org.nlp4l.ltr.support.controllers.LtrDashboard.supervise(ltrid: Int)
+GET           /ltrdashboard/$ltrid<[0-9]+>/annotation                   @org.nlp4l.ltr.support.controllers.LtrDashboard.annotation(ltrid: Int)
 GET           /ltrdashboard/$ltrid<[0-9]+>/feature                     @org.nlp4l.ltr.support.controllers.LtrDashboard.feature(ltrid: Int)
 GET           /ltrdashboard/$ltrid<[0-9]+>/model                       @org.nlp4l.ltr.support.controllers.LtrDashboard.model(ltrid: Int)
 

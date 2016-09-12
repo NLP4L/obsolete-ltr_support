@@ -24,7 +24,7 @@ import play.api.mvc.Controller
 import org.nlp4l.ltr.support.dao.FeatureDAO
 import org.nlp4l.ltr.support.dao.LtrconfigDAO
 import org.nlp4l.ltr.support.dao.LtrmodelDAO
-import org.nlp4l.ltr.support.dao.LtrsuperviseDAO
+import org.nlp4l.ltr.support.dao.LtrannotationDAO
 import org.nlp4l.ltr.support.dao.LtrqueryDAO
 import org.nlp4l.ltr.support.models.Ltrconfig
 import scala.concurrent.Await
@@ -38,7 +38,7 @@ class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO,
                              ltrconfigDAO: LtrconfigDAO,
                              ltrmodelDAO: LtrmodelDAO,
                              ltrqueryDAO: LtrqueryDAO,
-                             ltrsuperviseDAO: LtrsuperviseDAO) extends Controller {
+                             ltrannotationDAO: LtrannotationDAO) extends Controller {
 
   def index(ltrid: Int) = Action { request =>
     docFeatureDAO.init
@@ -46,7 +46,7 @@ class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO,
     ltrconfigDAO.init
     ltrmodelDAO.init
     ltrqueryDAO.init
-    ltrsuperviseDAO.init
+    ltrannotationDAO.init
     val menubars = buildMenubars(ltrid)
     Ok(org.nlp4l.ltr.support.views.html.dashboard(menubars))
   }
@@ -84,10 +84,10 @@ class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO,
   }
   
   
-  def supervise(ltrid: Int) = Action {
+  def annotation(ltrid: Int) = Action {
     val ltr = getLtr(ltrid)
     val menubars = buildMenubars(ltrid)
-    Ok(org.nlp4l.ltr.support.views.html.supervise(ltrid,menubars,ltr,"",""))
+    Ok(org.nlp4l.ltr.support.views.html.annotation(ltrid,menubars,ltr,"",""))
   }
   
   
@@ -117,7 +117,7 @@ class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO,
       Seq(
           Menubar("Config"+ltrname,"/ltrdashboard/" + ltrid + "/config"),
           Menubar("Query","/ltrdashboard/" + ltrid + "/query"),
-          Menubar("Supervise","/ltrdashboard/" + ltrid + "/supervise"),
+          Menubar("Annotation","/ltrdashboard/" + ltrid + "/annotation"),
           Menubar("Feature","/ltrdashboard/" + ltrid + "/feature"),
           Menubar("Model","/ltrdashboard/" + ltrid + "/model")
       )

@@ -35,7 +35,7 @@ import org.nlp4l.ltr.support.dao.LtrconfigDAO
 import org.nlp4l.ltr.support.dao.LtrconfigDAO
 import org.nlp4l.ltr.support.dao.LtrmodelDAO
 import org.nlp4l.ltr.support.dao.LtrqueryDAO
-import org.nlp4l.ltr.support.dao.LtrsuperviseDAO
+import org.nlp4l.ltr.support.dao.LtrannotationDAO
 import org.nlp4l.ltr.support.models.ActionResult
 import org.nlp4l.ltr.support.models.DbModels._
 import org.nlp4l.ltr.support.models.Ltrconfig
@@ -64,7 +64,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
                              ltrconfigDAO: LtrconfigDAO,
                              ltrmodelDAO: LtrmodelDAO,
                              ltrqueryDAO: LtrqueryDAO,
-                             ltrsuperviseDAO: LtrsuperviseDAO ,
+                             ltrannotationDAO: LtrannotationDAO ,
                              @Named("progress-actor") progressActor: ActorRef ) extends Controller {
 
 
@@ -74,7 +74,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
   def saveLtrConfig(ltrid: Int) = Action.async(parse.json) { request =>
     val data = request.body
     val name = (data \ "name").as[String]
-    val superviseType = (data \ "superviseType").as[String]
+    val annotationType = (data \ "annotationType").as[String]
     val modelFactryClassName = (data \ "modelFactryClassName").as[String]
     val modelFactoryClassSettings = (data \ "modelFactoryClassSettings").as[String]
     val searchUrl = (data \ "searchUrl").as[String]
@@ -85,7 +85,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     if (name.isEmpty) {
       Future.successful(BadRequest("Name cannot be empty."))
     } else {
-      val newLtr: Ltrconfig = Ltrconfig(Some(ltrid), name, superviseType, modelFactryClassName, Some(modelFactoryClassSettings), searchUrl, featureUrl, docUniqField, labelMax.toInt)
+      val newLtr: Ltrconfig = Ltrconfig(Some(ltrid), name, annotationType, modelFactryClassName, Some(modelFactoryClassSettings), searchUrl, featureUrl, docUniqField, labelMax.toInt)
       val f: Future[Ltrconfig] = ltrconfigDAO.get(ltrid)
       Await.ready(f, scala.concurrent.duration.Duration.Inf)
       f.value.get match {

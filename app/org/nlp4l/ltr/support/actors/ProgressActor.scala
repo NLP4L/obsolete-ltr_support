@@ -23,7 +23,7 @@ import javax.inject.Inject
 import org.nlp4l.ltr.support.dao.LtrmodelDAO
 import org.nlp4l.ltr.support.dao.LtrconfigDAO
 import org.nlp4l.ltr.support.dao.DocFeatureDAO
-import org.nlp4l.ltr.support.dao.LtrsuperviseDAO
+import org.nlp4l.ltr.support.dao.LtrannotationDAO
 import org.nlp4l.ltr.support.dao.LtrqueryDAO
 import org.nlp4l.ltr.support.dao.FeatureDAO
 import java.util.Random
@@ -37,7 +37,7 @@ class ProgressActor @Inject()(jdocFeatureDAO: DocFeatureDAO,
                              ltrconfigDAO: LtrconfigDAO,
                              ltrmodelDAO: LtrmodelDAO,
                              ltrqueryDAO: LtrqueryDAO,
-                             ltrsuperviseDAO: LtrsuperviseDAO) extends Actor {
+                             ltrannotationDAO: LtrannotationDAO) extends Actor {
   
   private val logger = Logger(this.getClass)
   

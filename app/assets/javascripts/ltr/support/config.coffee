@@ -43,14 +43,14 @@ $ ->
   
   check_input = () ->
     name = $('#name').val()
-    superviseType = $('#superviseType').val()
+    annotationType = $('#annotationType').val()
     labelMax = $('#labelMax').val()
     modelFactryClassName = $('#modelFactryClassName').val()
     searchUrl = $('#searchUrl').val()
     featureUrl = $('#featureUrl').val()
     docUniqField = $('#docUniqField').val()
 
-    if (name.length > 0 && superviseType.length > 0 && labelMax.length > 0 && modelFactryClassName.length > 0 && searchUrl.length > 0 && featureUrl.length > 0 && docUniqField.length > 0)
+    if (name.length > 0 && annotationType.length > 0 && labelMax.length > 0 && modelFactryClassName.length > 0 && searchUrl.length > 0 && featureUrl.length > 0 && docUniqField.length > 0)
       $('#save-button').prop('disabled', false)
     else
       $('#save-button').prop('disabled', true)
@@ -59,7 +59,7 @@ $ ->
     name = $('#name').val()
     check_input()
   
-  $('#superviseType').keyup ->
+  $('#annotationType').keyup ->
     check_input()
     
   $('#labelMax').keyup ->
@@ -79,7 +79,7 @@ $ ->
 
   $('#save-button').click ->
     name = $('#name').val()
-    superviseType = $('#superviseType').val()
+    annotationType = $('#annotationType').val()
     labelMax = $('#labelMax').val()
     modelFactryClassName = $('#modelFactryClassName').val()
     modelFactoryClassSettings = $('#modelFactoryClassSettings').val()
@@ -92,7 +92,7 @@ $ ->
       contentType: 'text/json',
       data: JSON.stringify({
       	"name": name, 
-      	"superviseType":superviseType,
+      	"annotationType":annotationType,
       	"labelMax":labelMax,
       	"modelFactryClassName":modelFactryClassName,
       	"modelFactoryClassSettings":modelFactoryClassSettings,

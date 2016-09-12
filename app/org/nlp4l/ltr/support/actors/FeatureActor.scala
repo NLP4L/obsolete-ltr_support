@@ -23,7 +23,7 @@ import javax.inject.Inject
 import org.nlp4l.ltr.support.dao.LtrmodelDAO
 import org.nlp4l.ltr.support.dao.LtrconfigDAO
 import org.nlp4l.ltr.support.dao.DocFeatureDAO
-import org.nlp4l.ltr.support.dao.LtrsuperviseDAO
+import org.nlp4l.ltr.support.dao.LtrannotationDAO
 import org.nlp4l.ltr.support.dao.LtrqueryDAO
 import org.nlp4l.ltr.support.dao.FeatureDAO
 import scala.util.Random
