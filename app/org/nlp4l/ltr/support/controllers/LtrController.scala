@@ -20,6 +20,7 @@ import java.util.UUID
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.io.File
+
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.convert.WrapAsScala._
 import scala.concurrent.Await
@@ -50,6 +51,7 @@ import play.api.libs.json.Json
 import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.api.mvc.Action
 import play.api.mvc.Controller
+
 import org.nlp4l.ltr.support.actors.ProgressGetMsg_Feature
 import org.nlp4l.ltr.support.actors.StartMsg_Feature
 import akka.actor.Props
@@ -57,6 +59,7 @@ import org.nlp4l.ltr.support.actors.ProgressActor
 import akka.pattern.AskableActorRef
 import akka.util.Timeout
 import java.util.concurrent.TimeUnit
+
 import org.nlp4l.ltr.support.actors.ClearMsg_Feature
 
 class LtrController @Inject()(docFeatureDAO: DocFeatureDAO, 
@@ -165,6 +168,33 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     val jsonResponse = Json.obj(
       "total" -> total,
       "rows" -> Json.toJson(res)
+    )
+    Ok(jsonResponse)
+  }
+  def search(ltrid: Int, qid: Int) = Action { request =>
+    val fc: Future[Ltrconfig] = ltrconfigDAO.get(ltrid)
+    val ltrconfig = Await.result(fc, scala.concurrent.duration.Duration.Inf)
+    val fq: Future[Ltrquery] = ltrqueryDAO.get(qid)
+    val ltrquery = Await.result(fq, scala.concurrent.duration.Duration.Inf)
+
+    val solrSearch = new SolrSearch(ltrconfig.searchUrl)
+    val solrRes = solrSearch.search(ltrquery.query)
+
+    val idField = "id"
+    val titleField = "title"
+    val bodyField = "body"
+    val docList = solrRes.docsList.map( doc => {
+      val bodyText = doc.getFirstValueAsString(bodyField)
+      val bodyTextShort = if (bodyText.length > 300) (bodyText.take(300) + "...") else bodyText
+      Map(
+        idField -> doc.getFirstValueAsString(idField),
+        titleField -> doc.getFirstValueAsString(titleField),
+        bodyField -> bodyTextShort
+      )
+    })
+    val jsonResponse = Json.obj(
+      "total" -> docList.size,
+      "rows" -> Json.toJson(docList)
     )
     Ok(jsonResponse)
   }

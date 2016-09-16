@@ -110,4 +110,10 @@ class LtrqueryDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
     val res = db.run(ltrqueries.filter(_.ltrid === ltrid).length.result)
     Await.result(res, scala.concurrent.duration.Duration.Inf)
   }
+
+  def fetchOrNext(ltrid: Int, qid: Int): Option[Ltrquery] = {
+    val query = ltrqueries.filter(_.ltrid === ltrid).filter(_.qid >= qid).sortBy(_.qid.asc)
+    val res = db.run(query.result.headOption)
+    Await.result(res, scala.concurrent.duration.Duration.Inf)
+  }
 }

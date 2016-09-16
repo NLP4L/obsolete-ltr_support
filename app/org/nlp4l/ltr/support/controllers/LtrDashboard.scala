@@ -84,10 +84,11 @@ class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO,
   }
   
   
-  def annotation(ltrid: Int) = Action {
+  def annotation(ltrid: Int, qid: Int) = Action {
     val ltr = getLtr(ltrid)
     val menubars = buildMenubars(ltrid)
-    Ok(org.nlp4l.ltr.support.views.html.annotation(ltrid,menubars,ltr,"",""))
+    val ltrquery =ltrqueryDAO.fetchOrNext(ltrid, qid)
+    Ok(org.nlp4l.ltr.support.views.html.annotation(ltrid,menubars,ltr,ltrquery,"",""))
   }
   
   

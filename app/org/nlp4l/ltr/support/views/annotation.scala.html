@@ -1,7 +1,7 @@
 @import org.nlp4l.ltr.support.models._
-@(currentLtrid: Int, menubars: Seq[Menubar], ltr: Option[Ltrconfig], success: String, error: String)
+@(currentLtrid: Int, menubars: Seq[Menubar], ltr: Option[Ltrconfig], ltrquery: Option[Ltrquery], success: String, error: String)
 @headerAddon = {
-
+<script src="@routes.Assets.versioned("javascripts/ltr/support/annotation.js")" type="text/javascript"></script>
 }
 
 <!--
@@ -38,7 +38,7 @@
               <div class="modal-content">
                 <div class="modal-body">
                   <p>
-                    <strong>Are you sure to clear the annotationd data?</strong>
+                    <strong>Are you sure to clear the annotationed data?</strong>
                   </p>
                   <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                   <button id="clear" type="button" class="btn btn-primary">OK</button>
@@ -47,15 +47,115 @@
             </div>
           </div>
         </div>
-      </div>
       </form>
     </div>
+
     <div class="row">
-      <div class="col-md-12 main">
-         SUPERVISE TABLE // TODO
-      </div>
+      <div class="col-sm-9 col-md-10 main">
+          <hr>
+          @if(ltrquery != None) {
+          <form id="nextQueryForm" action="/ltrdashboard/@currentLtrid/annotation/@ltrquery.get.qid">
+          </form>
+          <button id="nextQuery" class="btn btn-success" data-toggle="modal" data-target="#nextQueryModel"><i class="glyphicon glyphicon-search"></i> Next</button>
+          <!-- Modal -->
+          <div class="modal fade" id="nextQueryModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+              <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                      <div class="modal-body">
+                          <p>
+                              <strong>Are you sure to query next ?</strong>
+                          </p>
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                          <button id="nextQuery-button" type="button" class="btn btn-primary">OK</button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          }
+         @if(ltrquery == None) {
+         <b>Query = no more queries</b>
+         } else {
+         <b>Query = @ltrquery.get.query</b>
+         }
+
+         <button id="save-button" class="btn btn-success pull-right" data-toggle="modal" data-target="#saveModel"><i class="glyphicon glyphicon-save"></i> Save</button>
+        </div>
     </div>
-  </div>
+
+      <div class="row">
+          <div class="col-sm-9 col-md-10 main">
+              <div id="search_result_msg"></div>
+              <table id="search_result_table" class="table"></table>
+
+          </div>
+      </div>
+
+<script >
+
+@if(ltrquery != None) {
+
+var currentQid = @ltrquery.get.qid;
+
+$(document).ready(function() {
+  doSearch();
+});
+
+var stars;
+
+function doSearch() {
+  $.getJSON("/ltr/annotation/@currentLtrid/search/" + currentQid, function(data) {
+    var table = document.getElementById("search_result_table");
+    while( table.rows[ 0 ] ) table.deleteRow( 0 );
+    var header = table.insertRow(0);
+	header.insertCell(0).outerHTML = "<th>#</th>";
+	header.insertCell(1).outerHTML = "<th>contents</th>";
+	header.insertCell(2).outerHTML = "<th>labeling</th>";
+	stars =  new Array();
+	for (var i=0; i<data.rows.length; i++) {
+      var doc = data.rows[i];
+      stars[i] = new Array();
+      stars[i][0] = doc["id"]
+      for(j=1;j <= 5;j++){
+		stars[i][j] = 0;
+	  }
+      var row = table.insertRow(i+1);
+      var cell1 = row.insertCell(0);
+      var cell2 = row.insertCell(1);
+      var cell3 = row.insertCell(2);
+      cell1.innerHTML = i+1;
+      cell2.innerHTML = "<p><span class=\"text-primary\"><b><font size=+1>" + doc["title"] + "</font></b></span>" + "<br><p><span class=\"text-muted\">" + doc["body"] + "</span>";
+      var labelHtml = "";
+      for (var j=1 ; j<=5 ; j++){
+        labelHtml = labelHtml + "<button type=\"button\" class=\"btn btn-default btn-xs\" onclick='onClickStar(" + i + "," + j + ");'><span id=\"star_" + i + "_"+ j + "\" class=\"glyphicon glyphicon-star\" style=\"color:lightgray;\" aria-hidden=\"true\"></span></button>";
+      }
+      cell3.innerHTML = labelHtml;
+      cell3.style.cssText= 'white-space: nowrap;';
+
+    }
+
+  })
+  .error(function(jqXHR, textStatus, errorThrown) {
+    $("#search_result_msg").html(textStatus + ": " + errorThrown + "<br>" + jqXHR.responseText);
+  })
+}
+
+function onClickStar(row, label) {
+    var elm = document.getElementById("star_" + row + "_" + label);
+    if (stars[row][label] == 0) {
+        stars[row][label] = 1;
+        elm.style.cssText = 'color:red;';
+     } else {
+        stars[row][label] = 0;
+        elm.style.cssText = 'color:lightgray;';
+     }
+}
+
+$('#nextQuery-button').on('click', function(event) {
+	window.location.href = "/ltrdashboard/@currentLtrid/annotation/" + (currentQid + 1)
+});
+
+</script>
 
 }
 
+}
