@@ -27,6 +27,7 @@ import org.nlp4l.ltr.support.dao.LtrmodelDAO
 import org.nlp4l.ltr.support.dao.LtrannotationDAO
 import org.nlp4l.ltr.support.dao.LtrqueryDAO
 import org.nlp4l.ltr.support.models.Ltrconfig
+import org.nlp4l.ltr.support.models.Ltrquery
 import scala.concurrent.Await
 import org.nlp4l.ltr.support.models.Menubar
 import scala.util.Failure
@@ -87,7 +88,10 @@ class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO,
   def annotation(ltrid: Int, qid: Int) = Action {
     val ltr = getLtr(ltrid)
     val menubars = buildMenubars(ltrid)
-    val ltrquery =ltrqueryDAO.fetchOrNext(ltrid, qid)
+    val ltrquery =ltrqueryDAO.fetchOrNext(ltrid, qid) match {
+      case Some(x) => Some(x)
+      case _ => Some(Ltrquery(Some(0), "", ltrid, false))
+    }
     Ok(org.nlp4l.ltr.support.views.html.annotation(ltrid,menubars,ltr,ltrquery,"",""))
   }
   

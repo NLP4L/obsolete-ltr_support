@@ -36,6 +36,8 @@ case class Ltrconfig (
     searchUrl: String,
     featureUrl: String,
     docUniqField: String,
+    docTitleField: String,
+    docBodyField: String,
     labelMax: Int
 )
 
@@ -109,6 +111,8 @@ object DbModels {
         "searchUrl" -> d.searchUrl,
         "featureUrl" -> d.featureUrl,
         "docUniqField" -> d.docUniqField,
+        "docTitleField" -> d.docTitleField,
+        "docBodyField" -> d.docBodyField,
         "labelMax" -> d.labelMax
       )
   }
@@ -127,7 +131,8 @@ object DbModels {
       Json.obj(
         "qid" -> d.qid,
         "query" -> d.query,
-        "ltrid" -> d.ltrid
+        "ltrid" -> d.ltrid,
+        "checked_flg" -> d.checked_flg
       )
   }
   

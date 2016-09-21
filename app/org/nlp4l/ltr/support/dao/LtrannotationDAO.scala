@@ -20,6 +20,8 @@
 package org.nlp4l.ltr.support.dao
 
 import scala.concurrent.Future
+import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import org.nlp4l.ltr.support.models.Ltrannotation
 
@@ -61,6 +63,16 @@ class LtrannotationDAO @Inject()(protected val dbConfigProvider: DatabaseConfigP
   def insert(ltrannotation: Ltrannotation): Future[Ltrannotation] = {
     val LtrannotationWithId = (ltrannotations returning ltrannotations.map(_.qid) into ((ltrannotation, id) => ltrannotation.copy(qid=id))) += ltrannotation
     db.run(LtrannotationWithId)
+  }
+
+  def insertList(ltrannotationList: Seq[Ltrannotation]): Unit = {
+    val query = ltrannotations ++= ltrannotationList
+    Await.result(db.run(query), scala.concurrent.duration.Duration.Inf)
+  }
+
+  def deleteByQid(qid: Int): Unit = {
+    val query = ltrannotations.filter(_.qid === qid)
+    Await.result(db.run(query.delete), scala.concurrent.duration.Duration.Inf)
   }
 
   def update(Ltrannotation: Ltrannotation): Future[Int] = {

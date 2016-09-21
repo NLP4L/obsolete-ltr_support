@@ -94,6 +94,13 @@ class LtrqueryDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
           case "desc" =>
             db.run(ltrqueries.filter(_.ltrid === ltrid).sortBy(_.query.desc).drop(offset).take(size).result)
         }
+      case "checked_flg" =>
+        order match {
+          case "asc" =>
+            db.run(ltrqueries.filter(_.ltrid === ltrid).sortBy(_.checked_flg.asc).drop(offset).take(size).result)
+          case "desc" =>
+            db.run(ltrqueries.filter(_.ltrid === ltrid).sortBy(_.checked_flg.desc).drop(offset).take(size).result)
+        }
       case _ => {
         order match {
           case "asc" =>

@@ -49,8 +49,10 @@ $ ->
     searchUrl = $('#searchUrl').val()
     featureUrl = $('#featureUrl').val()
     docUniqField = $('#docUniqField').val()
+    docTitleField = $('#docTitleField').val()
+    docBodyField = $('#docBodyField').val()
 
-    if (name.length > 0 && annotationType.length > 0 && labelMax.length > 0 && modelFactryClassName.length > 0 && searchUrl.length > 0 && featureUrl.length > 0 && docUniqField.length > 0)
+    if (name.length > 0 && annotationType.length > 0 && labelMax.length > 0 && modelFactryClassName.length > 0 && searchUrl.length > 0 && featureUrl.length > 0 && docUniqField.length > 0 && docTitleField.length > 0&& docBodyField.length > 0)
       $('#save-button').prop('disabled', false)
     else
       $('#save-button').prop('disabled', true)
@@ -86,6 +88,8 @@ $ ->
     searchUrl = $('#searchUrl').val()
     featureUrl = $('#featureUrl').val()
     docUniqField = $('#docUniqField').val()
+    docTitleField = $('#docTitleField').val()
+    docBodyField = $('#docBodyField').val()
     $.ajax
       url: '/ltr/config' + ltrurl,
       type: 'POST',
@@ -98,8 +102,10 @@ $ ->
       	"modelFactoryClassSettings":modelFactoryClassSettings,
       	"searchUrl":searchUrl,
       	"featureUrl":featureUrl,
-      	"docUniqField":docUniqField
-      	
+      	"docUniqField":docUniqField,
+      	"docTitleField":docTitleField,
+      	"docBodyField":docBodyField
+
       }),
       success: (data, textStatus, jqXHR) ->
         jump = '/ltrdashboard'+currentLtrUrl+'/config/' + data.ltrid

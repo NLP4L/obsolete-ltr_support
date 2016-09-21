@@ -52,11 +52,27 @@
 
     <div class="row">
       <div class="col-sm-9 col-md-10 main">
-          <hr>
-          @if(ltrquery != None) {
-          <form id="nextQueryForm" action="/ltrdashboard/@currentLtrid/annotation/@ltrquery.get.qid">
-          </form>
-          <button id="nextQuery" class="btn btn-success" data-toggle="modal" data-target="#nextQueryModel"><i class="glyphicon glyphicon-search"></i> Next</button>
+         <table class="table" style="border-style: none;">
+         <tr>
+           <td>
+             <font size="+2"><b>Query = </b></font>
+           </td>
+           <td>
+         <input type="text" class="form-control" id="searchText" value="@ltrquery.get.query" style="font-weight: bold; font-size: 1.5em;">
+           </td>
+           <td>
+             <button id="search-button" class="btn btn-success" ><i class="glyphicon glyphicon-search"></i> Search</button>
+           </td>
+           <td align="right">
+             <button id="nextQuery" class="btn btn-success" data-toggle="modal" data-target="#nextQueryModel"><i class="glyphicon glyphicon-search"></i> Next</button>
+             <button id="save" class="btn btn-success" data-toggle="modal" data-target="#saveModel"><i class="glyphicon glyphicon-save"></i> Save</button>
+             <button id="delete" class="btn btn-success" data-toggle="modal" data-target="#deleteModel"><i class="glyphicon glyphicon-trash"></i> Delete</button>
+           </td>
+         </tr>
+         </table>
+
+         <div id="search_result_msg"></div>
+
           <!-- Modal -->
           <div class="modal fade" id="nextQueryModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
               <div class="modal-dialog" role="document">
@@ -71,30 +87,34 @@
                   </div>
               </div>
           </div>
-          }
-         @if(ltrquery == None) {
-         <b>Query = no more queries</b>
-         } else {
-         <b>Query = @ltrquery.get.query</b>
-         }
-
-         <button id="save-button" class="btn btn-success pull-right" data-toggle="modal" data-target="#saveModel"><i class="glyphicon glyphicon-save"></i> Save</button>
-        </div>
+          <!-- Modal -->
+          <div class="modal fade" id="saveModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+              <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                      <div class="modal-body">
+                          <p>
+                              <strong>Are you sure to save relevance degree ?</strong>
+                          </p>
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                          <button id="save-button" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
     </div>
 
       <div class="row">
           <div class="col-sm-9 col-md-10 main">
-              <div id="search_result_msg"></div>
               <table id="search_result_table" class="table"></table>
-
           </div>
       </div>
 
 <script >
 
-@if(ltrquery != None) {
-
 var currentQid = @ltrquery.get.qid;
+var currentQuery = "@ltrquery.get.query";
+var labelMax = @ltr.get.labelMax;
 
 $(document).ready(function() {
   doSearch();
@@ -103,14 +123,25 @@ $(document).ready(function() {
 var stars;
 
 function doSearch() {
-  $.getJSON("/ltr/annotation/@currentLtrid/search/" + currentQid, function(data) {
-    var table = document.getElementById("search_result_table");
-    while( table.rows[ 0 ] ) table.deleteRow( 0 );
-    var header = table.insertRow(0);
-	header.insertCell(0).outerHTML = "<th>#</th>";
-	header.insertCell(1).outerHTML = "<th>contents</th>";
-	header.insertCell(2).outerHTML = "<th>labeling</th>";
-	stars =  new Array();
+  var table = document.getElementById("search_result_table");
+  while( table.rows[ 0 ] ) table.deleteRow( 0 );
+  stars =  new Array();
+
+  var queryStr = $("#searchText").val()
+  currentQuery = queryStr
+  if (queryStr.trim().length == 0) {
+    $("#search_result_msg").html("<span class=\"text-danger h4\">No queries.</span>");
+    return;
+   }
+  $("#search_result_msg").html("");
+  var url = "/ltr/annotation/@currentLtrid/search/" + currentQid + "?q=" + encodeURIComponent(queryStr);;
+  $.getJSON(url, function(data) {
+    if (data.rows.length > 0) {
+      var header = table.insertRow(0);
+      header.insertCell(0).outerHTML = "<th>#</th>";
+	  header.insertCell(1).outerHTML = "<th>contents</th>";
+	  header.insertCell(2).outerHTML = "<th>relevance degree</th>";
+	 }
 	for (var i=0; i<data.rows.length; i++) {
       var doc = data.rows[i];
       stars[i] = new Array();
@@ -125,13 +156,15 @@ function doSearch() {
       cell1.innerHTML = i+1;
       cell2.innerHTML = "<p><span class=\"text-primary\"><b><font size=+1>" + doc["title"] + "</font></b></span>" + "<br><p><span class=\"text-muted\">" + doc["body"] + "</span>";
       var labelHtml = "";
-      for (var j=1 ; j<=5 ; j++){
+      for (var j=1 ; j<=labelMax ; j++){
         labelHtml = labelHtml + "<button type=\"button\" class=\"btn btn-default btn-xs\" onclick='onClickStar(" + i + "," + j + ");'><span id=\"star_" + i + "_"+ j + "\" class=\"glyphicon glyphicon-star\" style=\"color:lightgray;\" aria-hidden=\"true\"></span></button>";
       }
       cell3.innerHTML = labelHtml;
       cell3.style.cssText= 'white-space: nowrap;';
 
     }
+    if (data.rows.length == 0)
+      $("#search_result_msg").html("<span class=\"text-danger h4\">Query No Hits.</span>");
 
   })
   .error(function(jqXHR, textStatus, errorThrown) {
@@ -140,22 +173,59 @@ function doSearch() {
 }
 
 function onClickStar(row, label) {
-    var elm = document.getElementById("star_" + row + "_" + label);
-    if (stars[row][label] == 0) {
-        stars[row][label] = 1;
+    var changeToOn = (stars[row][label] == 0);
+    for (j=1;j <= 5;j++) {
+      var elm = document.getElementById("star_" + row + "_" + j);
+      if (j < label || (j == label && changeToOn)) {
+  	    stars[row][j] = 1;
         elm.style.cssText = 'color:red;';
-     } else {
-        stars[row][label] = 0;
+  	  } else {
+  		stars[row][j] = 0;
         elm.style.cssText = 'color:lightgray;';
-     }
+  	  }
+	}
 }
+
+$('#search-button').on('click', function(event) {
+  doSearch();
+});
 
 $('#nextQuery-button').on('click', function(event) {
 	window.location.href = "/ltrdashboard/@currentLtrid/annotation/" + (currentQid + 1)
 });
 
-</script>
+$('#save-button').on('click', function(event) {
+	var saveLabels = new Array();
+	for (var i in stars) {
+        var star = stars[i];
+        var cnt = 0;
+    	for (var j=1; j<=star.length; j++) {
+    	    if (star[j] == 1) cnt++;
+    	}
+	    var each = {
+            docId: star[0],
+            label: cnt
+    	};
+    	 saveLabels.push(each);
+	};
+	var obj = { ltrid: @currentLtrid, qid: currentQid, query: currentQuery, labels: saveLabels }
+	var json_text = JSON.stringify(obj);
+    $.ajax({
+        type: "post",
+        url: "/ltr/annotation/@currentLtrid/save/" + currentQid,
+        data: json_text,
+        contentType: 'application/json',
+        dataType: "json",
+        success: function(json_data) {
+              $("#search_result_msg").html("<span class=\"text-danger h4\">Saved succesfully.</span>");
+                return;
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            $("#search_result_msg").html(textStatus + ": " + errorThrown + "<br>" + jqXHR.responseText);
+        }
+    });
+});
 
-}
+</script>
 
 }

@@ -89,12 +89,12 @@
           	</div><!-- row -->
           	<div class="row">
           		<div class="form-group">
-          			<label class="col-sm-2 control-label" for="labelMax">Annotation Label</label>
+          			<label class="col-sm-2 control-label" for="labelMax">Relevance Degree</label>
           			<div class="col-sm-10">
           				<select class="form-control" id="labelMax" required >
           					<option value="1" @if(ltr.map(d => d.labelMax).getOrElse("") == 1) { selected }>0 to 1</option>
           					<option value="2" @if(ltr.map(d => d.labelMax).getOrElse("") == 2) { selected }>0 to 2</option>
-          					<option value="3" @if(ltr.map(d => d.labelMax).getOrElse("") == 3) { selected }>0 to 3</option>
+          					<option value="3" @if(ltr.map(d => d.labelMax).getOrElse(3) ==  3) { selected }>0 to 3</option>
           					<option value="4" @if(ltr.map(d => d.labelMax).getOrElse("") == 4) { selected }>0 to 4</option>
           					<option value="5" @if(ltr.map(d => d.labelMax).getOrElse("") == 5) { selected }>0 to 5</option>
           				</select>
@@ -121,7 +121,7 @@
           		<div class="form-group">
           			<label class="col-sm-2 control-label" for="searchUrl">Search URL</label>
           			<div class="col-sm-10">
-          				<input type="text" class="form-control" id="searchUrl" value="@ltr.map(d => d.searchUrl).getOrElse("")" required />
+          				<input type="text" class="form-control" id="searchUrl" value="@ltr.map(d => d.searchUrl).getOrElse("http://localhost:8983/solr/collection1/select?q=${query}&wt=json")" required />
           			</div>
           		</div>
           	</div><!-- row -->
@@ -137,11 +137,27 @@
           		<div class="form-group">
           			<label class="col-sm-2 control-label" for="docUniqField">Document Unique Field</label>
           			<div class="col-sm-10">
-          				<input type="text" class="form-control" id="docUniqField" value="@ltr.map(d => d.docUniqField).getOrElse("")" required />
+          				<input type="text" class="form-control" id="docUniqField" value="@ltr.map(d => d.docUniqField).getOrElse("id")" required />
           			</div>
           		</div>
           	</div><!-- row -->
-          	
+          	<div class="row">
+          		<div class="form-group">
+          			<label class="col-sm-2 control-label" for="docTitleField">Document Title Field</label>
+          			<div class="col-sm-10">
+          				<input type="text" class="form-control" id="docTitleField" value="@ltr.map(d => d.docTitleField).getOrElse("title")" required />
+          			</div>
+          		</div>
+          	</div><!-- row -->
+          	<div class="row">
+          		<div class="form-group">
+          			<label class="col-sm-2 control-label" for="docBodyField">Document Body Field</label>
+          			<div class="col-sm-10">
+          				<input type="text" class="form-control" id="docBodyField" value="@ltr.map(d => d.docBodyField).getOrElse("body")" required />
+          			</div>
+          		</div>
+          	</div><!-- row -->
+
           </div><!-- input_wrapper -->
           
         </form>

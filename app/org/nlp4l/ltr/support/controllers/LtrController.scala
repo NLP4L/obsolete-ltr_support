@@ -41,6 +41,7 @@ import org.nlp4l.ltr.support.models.ActionResult
 import org.nlp4l.ltr.support.models.DbModels._
 import org.nlp4l.ltr.support.models.Ltrconfig
 import org.nlp4l.ltr.support.models.Ltrquery
+import org.nlp4l.ltr.support.models.Ltrannotation
 import org.nlp4l.ltr.support.models.ViewModels._
 import com.google.inject.name.Named
 import akka.actor.ActorRef
@@ -51,6 +52,7 @@ import play.api.libs.json.Json
 import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.api.mvc.Action
 import play.api.mvc.Controller
+import play.api.libs.json.JsObject
 
 import org.nlp4l.ltr.support.actors.ProgressGetMsg_Feature
 import org.nlp4l.ltr.support.actors.StartMsg_Feature
@@ -73,7 +75,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
 
   implicit val timeout = Timeout(5000, TimeUnit.MILLISECONDS)
   val pa = new AskableActorRef(progressActor)
-  
+
   def saveLtrConfig(ltrid: Int) = Action.async(parse.json) { request =>
     val data = request.body
     val name = (data \ "name").as[String]
@@ -83,17 +85,19 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     val searchUrl = (data \ "searchUrl").as[String]
     val featureUrl = (data \ "featureUrl").as[String]
     val docUniqField = (data \ "docUniqField").as[String]
+    val docTitleField = (data \ "docTitleField").as[String]
+    val docBodyField = (data \ "docBodyField").as[String]
     val labelMax = (data \ "labelMax").as[String]
 
     if (name.isEmpty) {
       Future.successful(BadRequest("Name cannot be empty."))
     } else {
-      val newLtr: Ltrconfig = Ltrconfig(Some(ltrid), name, annotationType, modelFactryClassName, Some(modelFactoryClassSettings), searchUrl, featureUrl, docUniqField, labelMax.toInt)
+      val newLtr: Ltrconfig = Ltrconfig(Some(ltrid), name, annotationType, modelFactryClassName, Some(modelFactoryClassSettings), searchUrl, featureUrl, docUniqField, docTitleField, docBodyField, labelMax.toInt)
       val f: Future[Ltrconfig] = ltrconfigDAO.get(ltrid)
       Await.ready(f, scala.concurrent.duration.Duration.Inf)
       f.value.get match {
         case Success(ltr) => {
-          ltrconfigDAO.update( newLtr ) map {
+          ltrconfigDAO.update(newLtr) map {
             res => {
               val jsonResponse = Json.toJson(newLtr)
               Ok(jsonResponse)
@@ -103,7 +107,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
           }
         }
         case Failure(ex) => {
-          ltrconfigDAO.insert( newLtr ) map {
+          ltrconfigDAO.insert(newLtr) map {
             res => {
               val jsonResponse = Json.toJson(res)
               Ok(jsonResponse)
@@ -113,7 +117,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
           }
         }
       }
-      
+
     }
   }
 
@@ -137,7 +141,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
       file.ref.moveTo(temp, replace = true)
       val tempPath = Paths.get(temp.getAbsolutePath)
       val lines = Files.readAllLines(tempPath).toList
-      lines.foreach( l => {
+      lines.foreach(l => {
         val ltrquery = Ltrquery(None, l, ltrid, false)
         val f = ltrqueryDAO.insert(ltrquery)
         Await.ready(f, scala.concurrent.duration.Duration.Inf)
@@ -171,25 +175,32 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     )
     Ok(jsonResponse)
   }
+
   def search(ltrid: Int, qid: Int) = Action { request =>
     val fc: Future[Ltrconfig] = ltrconfigDAO.get(ltrid)
     val ltrconfig = Await.result(fc, scala.concurrent.duration.Duration.Inf)
-    val fq: Future[Ltrquery] = ltrqueryDAO.get(qid)
-    val ltrquery = Await.result(fq, scala.concurrent.duration.Duration.Inf)
 
     val solrSearch = new SolrSearch(ltrconfig.searchUrl)
-    val solrRes = solrSearch.search(ltrquery.query)
+    val queryStr = request.getQueryString("q") match {
+      case Some(q) => q
+      case _ => {
+        val fq: Future[Ltrquery] = ltrqueryDAO.get(qid)
+        val ltrquery = Await.result(fq, scala.concurrent.duration.Duration.Inf)
+        ltrquery.query
+      }
+    }
+    val solrRes = solrSearch.search(queryStr)
 
-    val idField = "id"
+    val idField = "url"
     val titleField = "title"
     val bodyField = "body"
-    val docList = solrRes.docsList.map( doc => {
+    val docList = solrRes.docsList.map(doc => {
       val bodyText = doc.getFirstValueAsString(bodyField)
       val bodyTextShort = if (bodyText.length > 300) (bodyText.take(300) + "...") else bodyText
       Map(
-        idField -> doc.getFirstValueAsString(idField),
-        titleField -> doc.getFirstValueAsString(titleField),
-        bodyField -> bodyTextShort
+        "id" -> doc.getFirstValueAsString(idField),
+        "title" -> doc.getFirstValueAsString(titleField),
+        "body" -> bodyTextShort
       )
     })
     val jsonResponse = Json.obj(
@@ -197,6 +208,26 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
       "rows" -> Json.toJson(docList)
     )
     Ok(jsonResponse)
+  }
+
+  def saveLabels(ltrid: Int, qid: Int) = Action.async(parse.json) { request =>
+    val data = request.body
+    val qid = (data \ "qid").as[Int]
+    val query = (data \ "query").as[String]
+    val labels = (data \ "labels").as[Seq[JsObject]].map( obj =>
+      (obj.value.get("docId").get.as[String], obj.value.get("label").get.as[Int])
+    )
+    ltrannotationDAO.deleteByQid(qid)
+    val list = labels.map(label => {
+      Ltrannotation(qid, label._1, label._2)
+    })
+    ltrannotationDAO.insertList(list)
+    val fq: Future[Ltrquery] = ltrqueryDAO.get(qid)
+    val ltrquery = Await.result(fq, scala.concurrent.duration.Duration.Inf)
+    val fu: Future[Int] = ltrqueryDAO.update(ltrquery.copy(checked_flg = true))
+    Await.ready(fu, scala.concurrent.duration.Duration.Inf)
+
+    Future.successful(Ok(Json.toJson(ActionResult(true, Seq("success")))))
   }
 
   def startFeatureEtraction(ltrid: Int) = Action {
