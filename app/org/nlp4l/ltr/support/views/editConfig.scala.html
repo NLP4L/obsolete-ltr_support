@@ -82,7 +82,7 @@
           			<label class="col-sm-2 control-label" for="annotationType">Annotation Type</label>
           			<div class="col-sm-10">
           				<select class="form-control" id="annotationType" required >
-          					<option value="pointwise"　@if(ltr.map(d => d.annotationType).getOrElse("") == "pointwise") { selected }>pointwise</option>
+          					<option value="pointwise"驍ｵ�ｽｲ�ｿｽ�ｽｿ�ｽｽ@if(ltr.map(d => d.annotationType).getOrElse("") == "pointwise") { selected }>pointwise</option>
           				</select>
           			</div>
           		</div>
@@ -127,9 +127,17 @@
           	</div><!-- row -->
           	<div class="row">
           		<div class="form-group">
-          			<label class="col-sm-2 control-label" for="featureUrl">Feature Retrieve URL</label>
+          			<label class="col-sm-2 control-label" for="featureExtractUrl">Feature Extract URL</label>
           			<div class="col-sm-10">
-          				<input type="text" class="form-control" id="featureUrl" value="@ltr.map(d => d.featureUrl).getOrElse("")" required />
+          				<input type="text" class="form-control" id="featureExtractUrl" value="@ltr.map(d => d.featureExtractUrl).getOrElse("http://localhost:8983/solr/collection1/features?command=extract&conf=settings.json")" required />
+          			</div>
+          		</div>
+          	</div><!-- row -->
+          	<div class="row">
+          		<div class="form-group">
+          			<label class="col-sm-2 control-label" for="featureRetrieveUrl">Feature Retrieve URL</label>
+          			<div class="col-sm-10">
+          				<input type="text" class="form-control" id="featureRetrieveUrl" value="@ltr.map(d => d.featureRetrieveUrl).getOrElse("http://localhost:8983/solr/collection1/features?command=progress&procId={procId}")" required />
           			</div>
           		</div>
           	</div><!-- row -->

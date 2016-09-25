@@ -83,7 +83,8 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     val modelFactryClassName = (data \ "modelFactryClassName").as[String]
     val modelFactoryClassSettings = (data \ "modelFactoryClassSettings").as[String]
     val searchUrl = (data \ "searchUrl").as[String]
-    val featureUrl = (data \ "featureUrl").as[String]
+    val featureExtractUrl = (data \ "featureExtractUrl").as[String]
+    val featureRetrieveUrl = (data \ "featureRetrieveUrl").as[String]
     val docUniqField = (data \ "docUniqField").as[String]
     val docTitleField = (data \ "docTitleField").as[String]
     val docBodyField = (data \ "docBodyField").as[String]
@@ -92,7 +93,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     if (name.isEmpty) {
       Future.successful(BadRequest("Name cannot be empty."))
     } else {
-      val newLtr: Ltrconfig = Ltrconfig(Some(ltrid), name, annotationType, modelFactryClassName, Some(modelFactoryClassSettings), searchUrl, featureUrl, docUniqField, docTitleField, docBodyField, labelMax.toInt)
+      val newLtr: Ltrconfig = Ltrconfig(Some(ltrid), name, annotationType, modelFactryClassName, Some(modelFactoryClassSettings), searchUrl, featureExtractUrl, featureRetrieveUrl, docUniqField, docTitleField, docBodyField, labelMax.toInt)
       val f: Future[Ltrconfig] = ltrconfigDAO.get(ltrid)
       Await.ready(f, scala.concurrent.duration.Duration.Inf)
       f.value.get match {

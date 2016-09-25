@@ -51,12 +51,13 @@ class LtrconfigDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     def model_factory_class_name = column[String]("model_factory_class_name")
     def model_factory_class_settings = column[Option[String]]("model_factory_class_settings")
     def search_url = column[String]("search_url")
-    def feature_url = column[String]("feature_url")
+    def feature_extract_url = column[String]("feature_extract_url")
+    def feature_retrieve_url = column[String]("feature_retrieve_url")
     def doc_uniq_field = column[String]("doc_uniq_field")
     def doc_title_field = column[String]("doc_title_field")
     def doc_body_field = column[String]("doc_body_field")
     def label_max = column[Int]("label_max")
-    def * = (ltrid.?, name, annotation_type, model_factory_class_name, model_factory_class_settings, search_url, feature_url, doc_uniq_field, doc_title_field, doc_body_field, label_max) <> (Ltrconfig.tupled, Ltrconfig.unapply)
+    def * = (ltrid.?, name, annotation_type, model_factory_class_name, model_factory_class_settings, search_url, feature_extract_url, feature_retrieve_url, doc_uniq_field, doc_title_field, doc_body_field, label_max) <> (Ltrconfig.tupled, Ltrconfig.unapply)
   }
 
   val ltrconfigs = TableQuery[LtrconfigTable]

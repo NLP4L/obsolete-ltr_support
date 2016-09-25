@@ -18,7 +18,6 @@ package org.nlp4l.ltr.support.actors
 
 import com.google.inject.AbstractModule
 import play.api.libs.concurrent.AkkaGuiceSupport
-import org.nlp4l.ltr.support.actors.ProgressActor
 
 class LtrSupportModule extends AbstractModule with AkkaGuiceSupport {
   override def configure(): Unit = {
