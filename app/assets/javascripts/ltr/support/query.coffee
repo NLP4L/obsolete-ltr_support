@@ -33,3 +33,9 @@ $ ->
     $('#uploadform').attr('action', action)
     $('#uploadform').attr('method', 'POST')
     $('#uploadform').submit()
+
+  $('#clear').click ->
+    action = '/ltr/query/' + ltrid + '/clear'
+    $('#uploadform').attr('action', action)
+    $('#uploadform').attr('method', 'POST')
+    $('#uploadform').submit()

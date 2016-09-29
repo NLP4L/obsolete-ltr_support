@@ -29,30 +29,12 @@
           <p class="text-success">@success</p>
           <p class="text-danger">@error</p>
       </div>
-      <div class="col-md-6 text-right">
-          <button id="clear-button" type="button" class="btn btn-warning" data-toggle="modal" data-target="#clearModal" ><i class="glyphicon glyphicon-erase"></i> Clear</button>
-          Saved Date: 1234
-          <!-- Modal -->
-          <div class="modal fade" id="clearModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-body">
-                  <p>
-                    <strong>Are you sure to clear the annotationed data?</strong>
-                  </p>
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                  <button id="clear" type="button" class="btn btn-primary">OK</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </form>
     </div>
 
     <div class="row">
       <div class="col-sm-9 col-md-10 main">
-         <table class="table" style="border-style: none;">
+         <table class="table">
          <tr>
            <td>
              <font size="+2"><b>Query = </b></font>
@@ -65,13 +47,15 @@
            </td>
            <td align="right">
              <button id="nextQuery" class="btn btn-success" data-toggle="modal" data-target="#nextQueryModel"><i class="glyphicon glyphicon-search"></i> Next</button>
-             <button id="save" class="btn btn-success" data-toggle="modal" data-target="#saveModel"><i class="glyphicon glyphicon-save"></i> Save</button>
-             <button id="delete" class="btn btn-success" data-toggle="modal" data-target="#deleteModel"><i class="glyphicon glyphicon-trash"></i> Delete</button>
+             <button id="save" class="btn btn-danger" data-toggle="modal" data-target="#saveModel" @if(ltrquery.get.qid.get == 0) { disabled="disabled" }><i class="glyphicon glyphicon-save"></i> Save</button>
+             <button id="delete" class="btn btn-warning" data-toggle="modal" data-target="#deleteModel" @if(ltrquery.get.qid.get == 0) { disabled="disabled" }><i class="glyphicon glyphicon-trash"></i> Delete</button>
            </td>
          </tr>
          </table>
 
+         <p>
          <div id="search_result_msg"></div>
+         </p>
 
           <!-- Modal -->
           <div class="modal fade" id="nextQueryModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -93,10 +77,24 @@
                   <div class="modal-content">
                       <div class="modal-body">
                           <p>
-                              <strong>Are you sure to save relevance degree ?</strong>
+                              <strong>Are you sure to save this relevance degree ?</strong>
                           </p>
                           <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                           <button id="save-button" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <!-- Modal -->
+          <div class="modal fade" id="deleteModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+              <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                      <div class="modal-body">
+                          <p>
+                              <strong>Are you sure to delete this query ?</strong>
+                          </p>
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                          <button id="delete-button" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
                       </div>
                   </div>
               </div>
@@ -130,41 +128,54 @@ function doSearch() {
   var queryStr = $("#searchText").val()
   currentQuery = queryStr
   if (queryStr.trim().length == 0) {
-    $("#search_result_msg").html("<span class=\"text-danger h4\">No queries.</span>");
+    $("#search_result_msg").html("<div class=\"alert alert-danger\">No queries.</div>");
     return;
    }
   $("#search_result_msg").html("");
-  var url = "/ltr/annotation/@currentLtrid/search/" + currentQid + "?q=" + encodeURIComponent(queryStr);;
+  var url = "/ltr/annotation/@currentLtrid/search/" + currentQid + "?q=" + encodeURIComponent(queryStr);
   $.getJSON(url, function(data) {
-    if (data.rows.length > 0) {
-      var header = table.insertRow(0);
-      header.insertCell(0).outerHTML = "<th>#</th>";
-	  header.insertCell(1).outerHTML = "<th>contents</th>";
-	  header.insertCell(2).outerHTML = "<th>relevance degree</th>";
-	 }
-	for (var i=0; i<data.rows.length; i++) {
-      var doc = data.rows[i];
-      stars[i] = new Array();
-      stars[i][0] = doc["id"]
-      for(j=1;j <= 5;j++){
-		stars[i][j] = 0;
-	  }
-      var row = table.insertRow(i+1);
-      var cell1 = row.insertCell(0);
-      var cell2 = row.insertCell(1);
-      var cell3 = row.insertCell(2);
-      cell1.innerHTML = i+1;
-      cell2.innerHTML = "<p><span class=\"text-primary\"><b><font size=+1>" + doc["title"] + "</font></b></span>" + "<br><p><span class=\"text-muted\">" + doc["body"] + "</span>";
-      var labelHtml = "";
-      for (var j=1 ; j<=labelMax ; j++){
-        labelHtml = labelHtml + "<button type=\"button\" class=\"btn btn-default btn-xs\" onclick='onClickStar(" + i + "," + j + ");'><span id=\"star_" + i + "_"+ j + "\" class=\"glyphicon glyphicon-star\" style=\"color:lightgray;\" aria-hidden=\"true\"></span></button>";
-      }
-      cell3.innerHTML = labelHtml;
-      cell3.style.cssText= 'white-space: nowrap;';
+	 if (data.status == 0) {
+        if (data.rows.length > 0) {
+          var header = table.insertRow(0);
+          header.insertCell(0).outerHTML = "<th>#</th>";
+          header.insertCell(1).outerHTML = "<th>contents</th>";
+          header.insertCell(2).outerHTML = "<th>relevance degree</th>";
+         }
+        for (var i=0; i<data.rows.length; i++) {
+          var doc = data.rows[i];
+          stars[i] = new Array();
+          stars[i][0] = doc["id"]
+          var label = Number(doc["label"])
+          for(j=1;j <= 5;j++){
+            if (label < j)
+              stars[i][j] = 0;
+             else
+              stars[i][j] = 1;
+          }
+          var row = table.insertRow(i+1);
+          var cell1 = row.insertCell(0);
+          var cell2 = row.insertCell(1);
+          var cell3 = row.insertCell(2);
+          cell1.innerHTML = i+1;
+          cell2.innerHTML = "<p><span class=\"text-primary\"><b><font size=+1>" + doc["title"] + "</font></b></span>" + "<br><p><span class=\"text-muted\">" + doc["body"] + "</span>";
+          var labelHtml = "";
+          for (var j=1 ; j<=labelMax ; j++){
+            var color;
+            if (label < j)
+              color = 'color:lightgray;'
+            else
+              color = 'color:red;'
+            labelHtml = labelHtml + "<button type=\"button\" class=\"btn btn-default btn-xs\" onclick='onClickStar(" + i + "," + j + ");'><span id=\"star_" + i + "_"+ j + "\" class=\"glyphicon glyphicon-star\" style=\"" + color + "\" aria-hidden=\"true\"></span></button>";
+          }
+          cell3.innerHTML = labelHtml;
+          cell3.style.cssText= 'white-space: nowrap;';
 
-    }
-    if (data.rows.length == 0)
-      $("#search_result_msg").html("<span class=\"text-danger h4\">Query No Hits.</span>");
+        }
+        if (data.rows.length == 0)
+          $("#search_result_msg").html("<div class=\"alert alert-danger\">Query No Hits.</div>");
+     } else {
+          $("#search_result_msg").html("<div class=\"alert alert-danger\">Search error: " + data.msg + "</div>");
+     }
 
   })
   .error(function(jqXHR, textStatus, errorThrown) {
@@ -191,7 +202,7 @@ $('#search-button').on('click', function(event) {
 });
 
 $('#nextQuery-button').on('click', function(event) {
-	window.location.href = "/ltrdashboard/@currentLtrid/annotation/" + (currentQid + 1)
+	window.location.href = "/ltr/annotation/@currentLtrid/next/" + currentQid
 });
 
 $('#save-button').on('click', function(event) {
@@ -208,22 +219,44 @@ $('#save-button').on('click', function(event) {
     	};
     	 saveLabels.push(each);
 	};
-	var obj = { ltrid: @currentLtrid, qid: currentQid, query: currentQuery, labels: saveLabels }
+	var saveQid = currentQid;
+	if (currentQid > 0 && currentQuery != "@ltrquery.get.query") {
+	  // if search text has been changed, save it as a new query.
+      saveQid = 0;
+	}
+    var url = "/ltr/annotation/@currentLtrid/save/" + saveQid;
+	var obj = { query: currentQuery, labels: saveLabels }
 	var json_text = JSON.stringify(obj);
     $.ajax({
         type: "post",
-        url: "/ltr/annotation/@currentLtrid/save/" + currentQid,
+        url: url,
         data: json_text,
         contentType: 'application/json',
         dataType: "json",
         success: function(json_data) {
-              $("#search_result_msg").html("<span class=\"text-danger h4\">Saved succesfully.</span>");
-                return;
+                if (saveQid == 0) {
+                  $("#search_result_msg").html("<div class=\"alert alert-danger\">Saved as New Query successfully.</div>");
+                  currentQid = json_data.qid
+                } else
+                  $("#search_result_msg").html("<div class=\"alert alert-danger\">Saved successfully.</div>");
         },
         error: function(jqXHR, textStatus, errorThrown) {
             $("#search_result_msg").html(textStatus + ": " + errorThrown + "<br>" + jqXHR.responseText);
         }
     });
+});
+
+$('#delete-button').on('click', function(event) {
+    $.ajax({
+      url: "/ltr/annotation/@currentLtrid/delete/" + currentQid,
+      type: 'DELETE',
+        success: function(json_data) {
+        	window.location.href = "/ltr/annotation/@currentLtrid/next/" + currentQid
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            $("#search_result_msg").html(textStatus + ": " + errorThrown + "<br>" + jqXHR.responseText);
+        }
+     });
 });
 
 </script>

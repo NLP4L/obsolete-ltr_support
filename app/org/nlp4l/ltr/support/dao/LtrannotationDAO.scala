@@ -60,6 +60,11 @@ class LtrannotationDAO @Inject()(protected val dbConfigProvider: DatabaseConfigP
     db.run(query.result.head)
   }
 
+  def getByQid(qid: Int): Future[Seq[Ltrannotation]] = {
+    val query = ltrannotations.filter(_.qid === qid)
+    db.run(query.result)
+  }
+
   def insert(ltrannotation: Ltrannotation): Future[Ltrannotation] = {
     val LtrannotationWithId = (ltrannotations returning ltrannotations.map(_.qid) into ((ltrannotation, id) => ltrannotation.copy(qid=id))) += ltrannotation
     db.run(LtrannotationWithId)
@@ -97,8 +102,5 @@ class LtrannotationDAO @Inject()(protected val dbConfigProvider: DatabaseConfigP
         }
     }
   }
-
-  
-  
 
 }

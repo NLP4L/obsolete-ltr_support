@@ -25,3 +25,13 @@ $ ->
   if(qid == "annotation")
     qid = "0"
 
+  check_input = () ->
+    searchText = $('#searchText').val()
+
+    if (searchText.length > 0)
+      $('#save').prop('disabled', false)
+    else
+      $('#save').prop('disabled', true)
+
+  $('#searchText').keyup ->
+    check_input()

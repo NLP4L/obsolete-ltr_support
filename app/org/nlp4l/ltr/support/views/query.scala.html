@@ -35,7 +35,7 @@
   <div class="container-fluid">
     <div class="row">
       <form id="uploadform" data-toggle="validator" enctype="multipart/form-data" method="post">
-      <div class="col-md-6">
+      <div class="col-md-5">
           <p class="text-success">@success</p>
           <p class="text-danger">@error</p>
       </div>
@@ -44,25 +44,42 @@
             <input type="file" id="query" name="query">
           </div>
       </div>
-      <div class="col-md-3">
-          <button id="upload-button" type="button" class="btn btn-primary" data-toggle="modal" data-target="#uploadModal" disabled><i class="glyphicon glyphicon-upload"></i> Upload</button>
-          <!-- Modal -->
-          <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-body">
-                  <p>
-                    <strong>Are you sure to upload the query file ?</strong>
-                  </p>
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                  <button id="upload" type="button" class="btn btn-primary">OK</button>
-                </div>
+      <div class="col-md-4">
+        <button id="upload-button" type="button" class="btn btn-primary" data-toggle="modal" data-target="#uploadModal" disabled><i class="glyphicon glyphicon-upload"></i> Upload</button>
+        <!-- Modal -->
+        <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-body">
+                <p>
+                  <strong>Are you sure to upload the query file ?</strong>
+                </p>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button id="upload" type="button" class="btn btn-primary">OK</button>
               </div>
             </div>
           </div>
         </div>
-      </div>
+
+        <button id="clear-button" type="button" class="btn btn-warning" data-toggle="modal" data-target="#clearModal" ><i class="glyphicon glyphicon-erase"></i> Clear</button>
+        <!-- Modal -->
+        <div class="modal fade" id="clearModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-body">
+                <p>
+                  <strong>Are you sure to clear all annotations ?</strong>
+                </p>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button id="clear" type="button" class="btn btn-primary">OK</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        </div>
       </form>
+    </div>
 
     <div class="row">
       <div class="col-sm-9 col-md-10 main">
