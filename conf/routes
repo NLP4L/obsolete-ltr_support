@@ -50,6 +50,7 @@ POST          /ltr/query/$ltrid<[0-9]+>                                @org.nlp4
 POST          /ltr/query/$ltrid<[0-9]+>/clear                          @org.nlp4l.ltr.support.controllers.LtrController.clearAnnotation(ltrid: Int)
 GET           /ltr/query/$ltrid<[0-9]+>/list                           @org.nlp4l.ltr.support.controllers.LtrController.listQuery(ltrid: Int)
 GET           /ltr/annotation/$ltrid<[0-9]+>/search/$qid<[0-9]+>       @org.nlp4l.ltr.support.controllers.LtrController.search(ltrid: Int, qid: Int)
+GET           /ltr/annotation/$ltrid<[0-9]+>/searchById                @org.nlp4l.ltr.support.controllers.LtrController.searchById(ltrid: Int)
 GET           /ltr/annotation/$ltrid<[0-9]+>/next/$qid<[0-9]+>         @org.nlp4l.ltr.support.controllers.LtrController.nextQuery(ltrid: Int, qid: Int)
 POST          /ltr/annotation/$ltrid<[0-9]+>/save/$qid<[0-9]+>         @org.nlp4l.ltr.support.controllers.LtrController.saveLabels(ltrid: Int, qid: Int)
 DELETE        /ltr/annotation/$ltrid<[0-9]+>/delete/$qid<[0-9]+>       @org.nlp4l.ltr.support.controllers.LtrController.deleteQuery(ltrid: Int, qid: Int)

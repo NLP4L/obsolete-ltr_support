@@ -46,9 +46,9 @@
              <button id="search-button" class="btn btn-success" ><i class="glyphicon glyphicon-search"></i> Search</button>
            </td>
            <td align="right">
-             <button id="nextQuery" class="btn btn-success" data-toggle="modal" data-target="#nextQueryModel"><i class="glyphicon glyphicon-search"></i> Next</button>
-             <button id="save" class="btn btn-danger" data-toggle="modal" data-target="#saveModel" @if(ltrquery.get.qid.get == 0) { disabled="disabled" }><i class="glyphicon glyphicon-save"></i> Save</button>
-             <button id="delete" class="btn btn-warning" data-toggle="modal" data-target="#deleteModel" @if(ltrquery.get.qid.get == 0) { disabled="disabled" }><i class="glyphicon glyphicon-trash"></i> Delete</button>
+             <button id="nextQuery" class="btn btn-success" data-toggle="modal" data-target="#nextQueryModal"><i class="glyphicon glyphicon-search"></i> Next</button>
+             <button id="save" class="btn btn-danger" data-toggle="modal" data-target="#saveModal" @if(ltrquery.get.qid.get == 0) { disabled="disabled" }><i class="glyphicon glyphicon-save"></i> Save</button>
+             <button id="delete" class="btn btn-warning" data-toggle="modal" data-target="#deleteModal" @if(ltrquery.get.qid.get == 0) { disabled="disabled" }><i class="glyphicon glyphicon-trash"></i> Delete</button>
            </td>
          </tr>
          </table>
@@ -58,7 +58,7 @@
          </p>
 
           <!-- Modal -->
-          <div class="modal fade" id="nextQueryModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal fade" id="nextQueryModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
               <div class="modal-dialog" role="document">
                   <div class="modal-content">
                       <div class="modal-body">
@@ -72,7 +72,7 @@
               </div>
           </div>
           <!-- Modal -->
-          <div class="modal fade" id="saveModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal fade" id="saveModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
               <div class="modal-dialog" role="document">
                   <div class="modal-content">
                       <div class="modal-body">
@@ -86,7 +86,7 @@
               </div>
           </div>
           <!-- Modal -->
-          <div class="modal fade" id="deleteModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
               <div class="modal-dialog" role="document">
                   <div class="modal-content">
                       <div class="modal-body">
@@ -107,6 +107,21 @@
               <table id="search_result_table" class="table"></table>
           </div>
       </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="moreModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                   <table id="more_table" class="table"></table>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+      </div>
+  </div>
+
 
 <script >
 
@@ -157,7 +172,7 @@ function doSearch() {
           var cell2 = row.insertCell(1);
           var cell3 = row.insertCell(2);
           cell1.innerHTML = i+1;
-          cell2.innerHTML = "<p><span class=\"text-primary\"><b><font size=+1>" + doc["title"] + "</font></b></span>" + "<br><p><span class=\"text-muted\">" + doc["body"] + "</span>";
+          cell2.innerHTML = "<p><span class=\"text-primary\"><b><font size=+1>" + doc["title"] + "</font></b></span>" + "<br><p><span class=\"text-muted\">" + doc["body"] + "</span>" + "<p><span class=\"text-muted\"><button type=\"button\" class=\"btn btn-info btn-xs\" data-toggle=\"modal\" data-target=\"#moreModal\" data-row=\"" + i + "\">more</button></span>";
           var labelHtml = "";
           for (var j=1 ; j<=labelMax ; j++){
             var color;
@@ -196,6 +211,30 @@ function onClickStar(row, label) {
   	  }
 	}
 }
+
+$('#moreModal').on('show.bs.modal', function (event) {
+    var table = document.getElementById("more_table");
+    while( table.rows[ 0 ] ) table.deleteRow( 0 );
+    var button = $(event.relatedTarget);
+    var rowIdx = button.data('row');
+    var docid = stars[rowIdx][0];
+    var url = "/ltr/annotation/@currentLtrid/searchById?id=" + encodeURIComponent(docid);
+    $.getJSON(url, function(data) {
+        var i = 0;
+        for(var key in data) {
+            var row1 = table.insertRow(i);
+            var cell1 = row1.insertCell(0);
+            var cell2 = row1.insertCell(1);
+            cell1.innerHTML = key;
+            if (data[key].constructor === Array) {
+                cell2.innerHTML = data[key].join("<br>");
+            } else {
+                cell2.innerHTML = data[key];
+            }
+            i++;
+        }
+    })
+});
 
 $('#search-button').on('click', function(event) {
   doSearch();

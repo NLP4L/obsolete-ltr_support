@@ -225,21 +225,38 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
       val idField = ltrconfig.docUniqField
       val titleField = ltrconfig.docTitleField
       val bodyField = ltrconfig.docBodyField
-      val docList = solrRes.docsList.map(doc => {
-        val idText = doc.getFirstValueAsString(idField)
-        val titleText = doc.getFirstValueAsString(titleField)
-        val bodyText = doc.getFirstValueAsString(bodyField)
-        val bodyTextShort = if (bodyText.length > 300) (bodyText.take(300) + "...") else bodyText
-        Map(
+      val docList = solrRes.docs.map(doc => {
+        val idText = solrRes.getFirstValueAsString(doc, idField)
+        val titleTextHL = solrRes.getHighlighting(idText,titleField)
+        val titleText =
+          if (titleTextHL != null) titleTextHL
+          else {
+            val titleText = solrRes.getValueAsString(doc, titleField, "<br>")
+            if (titleText == null) ""
+            else titleText
+          }
+        val bodyTextHL = solrRes.getHighlighting(idText,bodyField)
+        val bodyText =
+          if (bodyTextHL != null) bodyTextHL
+          else {
+            val bodyText = solrRes.getValueAsString(doc, bodyField, "<br>")
+            if (bodyText == null) ""
+            else if (bodyText.length > 300) {
+              val idx = bodyText.substring(290, 300).indexOf("<")
+              val bodyTextShort = if (idx > -1) bodyText.take(290+idx) else bodyText.take(300)
+              bodyTextShort + "..."
+            } else bodyText
+          }
+        Json.obj(
           "id" -> idText,
-          "label" -> labelMap.getOrElse(idText, 0).toString,
+          "label" -> Json.toJson(labelMap.getOrElse(idText, 0)),
           "title" -> titleText,
-          "body" -> bodyTextShort
+          "body" -> bodyText
         )
       })
       val jsonResponse = Json.obj(
         "status" -> 0,
-        "rows" -> Json.toJson(docList)
+        "rows" -> docList
       )
       Ok(jsonResponse)
     } else {
@@ -249,6 +266,21 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
       )
       Ok(jsonResponse)
     }
+  }
+
+  def searchById(ltrid: Int) = Action { request =>
+    val fc: Future[Ltrconfig] = ltrconfigDAO.get(ltrid)
+    val ltrconfig = Await.result(fc, scala.concurrent.duration.Duration.Inf)
+
+    val solrSearch = new SolrSearch(ltrconfig.searchUrl)
+    val queryStr = ltrconfig.docUniqField + ":\"" + request.getQueryString("id").get + "\""
+    val solrRes = solrSearch.search(queryStr)
+    val idField = ltrconfig.docUniqField
+    val titleField = ltrconfig.docTitleField
+    val bodyField = ltrconfig.docBodyField
+    val doc = solrRes.docs.head
+    val jsonResponse = doc
+    Ok(jsonResponse)
   }
 
   def saveLabels(ltrid: Int, qid: Int) = Action(parse.json) { request =>

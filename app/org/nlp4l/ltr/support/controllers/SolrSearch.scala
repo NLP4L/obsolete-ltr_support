@@ -63,17 +63,35 @@ class SolrSearchResponse(val jsonString: String) {
     (json \ "error" \ "msg").as[String]
   }
 
-  def docsList(): Seq[SolrSearchResultDocument] = {
-    (json \ "response" \ "docs").as[Seq[JsObject]].map(
-      new SolrSearchResultDocument(_)
-    )
+  def docs(): Seq[JsObject] = {
+    (json \ "response" \ "docs").as[Seq[JsObject]]
   }
-}
 
-class SolrSearchResultDocument(val doc: JsObject) {
+  def getHighlighting(uk : String, name: String): String = {
+    val v = (json \ "highlighting" \ uk ).asOpt[JsObject]
+    v match {
+      case Some(x) =>
+        getValueAsString(x, name, "...")
+      case None => null
+    }
+  }
 
-  def getFirstValueAsString(name: String): String = {
-    val v = doc.value.get(name)
+  def getValueAsString(value : JsObject, name: String, separator: String): String = {
+    val v = value.value.get(name)
+    v match {
+      case Some(x) =>
+        if (x.isInstanceOf[JsArray]) {
+          val seq = x.as[Seq[JsValue]]
+          if (seq.nonEmpty) seq.map(_.as[String]).mkString(separator) else null
+        } else {
+          x.as[String]
+        }
+      case None => null
+    }
+  }
+
+  def getFirstValueAsString(value : JsObject, name: String): String = {
+    val v = value.value.get(name)
     v match {
       case Some(x) =>
         if (x.isInstanceOf[JsArray]) {
@@ -86,3 +104,4 @@ class SolrSearchResultDocument(val doc: JsObject) {
     }
   }
 }
+
