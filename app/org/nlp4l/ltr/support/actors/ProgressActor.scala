@@ -29,6 +29,7 @@ import org.nlp4l.ltr.support.dao.FeatureDAO
 import java.util.Random
 import akka.actor.ActorRef
 import play.api.Logger
+import org.nlp4l.ltr.support.models.Ltrconfig
 
 
 
@@ -42,8 +43,8 @@ class ProgressActor @Inject()(jdocFeatureDAO: DocFeatureDAO,
   private val logger = Logger(this.getClass)
   
   override def receive: Receive = {
-    case StartMsg_Feature(ltrid: Int) => {
-      context.actorOf(Props[FeatureActor]) ! StartMsg_Feature(ltrid)
+    case StartMsg_Feature(ltr: Ltrconfig) => {
+      context.actorOf(Props[FeatureActor]) ! StartMsg_Feature(ltr)
     }
     case ProgressSetMsg_Feature(ltrid: Int, value: Int) => {
       logger.info("ProgressSetMsg_Feature received: " + ltrid + " [" + value + "]")
@@ -71,7 +72,7 @@ object ProgressActor {
 }
 
 // Start a feature extraction
-case class StartMsg_Feature(ltrid: Int)
+case class StartMsg_Feature(ltr: Ltrconfig)
 // Set a progress value of the feature extraction
 case class ProgressSetMsg_Feature(ltrid: Int, value: Int)
 // Get a progress value of the feature extraction

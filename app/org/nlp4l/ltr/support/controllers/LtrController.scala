@@ -16,10 +16,11 @@
 
 package org.nlp4l.ltr.support.controllers
 
-import java.util.UUID
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.io.File
+import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.convert.WrapAsScala._
@@ -30,39 +31,44 @@ import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 import scala.util.Failure
 import scala.util.Success
+
+import org.nlp4l.ltr.support.actors.ClearMsg_Feature
+import org.nlp4l.ltr.support.actors.ProgressGetMsg_Feature
+import org.nlp4l.ltr.support.actors.StartMsg_Feature
 import org.nlp4l.ltr.support.dao.DocFeatureDAO
 import org.nlp4l.ltr.support.dao.FeatureDAO
+import org.nlp4l.ltr.support.dao.LtrannotationDAO
 import org.nlp4l.ltr.support.dao.LtrconfigDAO
 import org.nlp4l.ltr.support.dao.LtrconfigDAO
 import org.nlp4l.ltr.support.dao.LtrmodelDAO
 import org.nlp4l.ltr.support.dao.LtrqueryDAO
-import org.nlp4l.ltr.support.dao.LtrannotationDAO
 import org.nlp4l.ltr.support.models.ActionResult
-import org.nlp4l.ltr.support.models.DbModels._
+import org.nlp4l.ltr.support.models.FeatureExtractDTO
+import org.nlp4l.ltr.support.models.Ltrannotation
+import org.nlp4l.ltr.support.models.Ltrannotation
+import org.nlp4l.ltr.support.models.Ltrannotation
+import org.nlp4l.ltr.support.models.Ltrconfig
+import org.nlp4l.ltr.support.models.Ltrconfig
 import org.nlp4l.ltr.support.models.Ltrconfig
 import org.nlp4l.ltr.support.models.Ltrquery
-import org.nlp4l.ltr.support.models.Ltrannotation
+import org.nlp4l.ltr.support.models.Ltrquery
+import org.nlp4l.ltr.support.models.Ltrquery
 import org.nlp4l.ltr.support.models.ViewModels._
+import org.nlp4l.ltr.support.models.DbModels._
+import org.nlp4l.ltr.support.models.LtrModels._
+
 import com.google.inject.name.Named
+
 import akka.actor.ActorRef
-import akka.actor.ActorSystem
+import akka.pattern.AskableActorRef
+import akka.util.Timeout
 import javax.inject.Inject
+import play.api.libs.json.JsObject
 import play.api.libs.json.JsValue.jsValueToJsLookup
 import play.api.libs.json.Json
 import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.api.mvc.Action
 import play.api.mvc.Controller
-import play.api.libs.json.JsObject
-
-import org.nlp4l.ltr.support.actors.ProgressGetMsg_Feature
-import org.nlp4l.ltr.support.actors.StartMsg_Feature
-import akka.actor.Props
-import org.nlp4l.ltr.support.actors.ProgressActor
-import akka.pattern.AskableActorRef
-import akka.util.Timeout
-import java.util.concurrent.TimeUnit
-
-import org.nlp4l.ltr.support.actors.ClearMsg_Feature
 
 class LtrController @Inject()(docFeatureDAO: DocFeatureDAO, 
                              featureDAO: FeatureDAO, 
@@ -233,7 +239,9 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
   }
 
   def startFeatureEtraction(ltrid: Int) = Action {
-    progressActor ! StartMsg_Feature(ltrid)
+    val f: Future[Ltrconfig] = ltrconfigDAO.get(ltrid)
+    val ltr = Await.result(f, scala.concurrent.duration.Duration.Inf)
+    progressActor ! StartMsg_Feature(ltr)
     Ok(Json.toJson(ActionResult(true, Seq("started"))))
   }
   

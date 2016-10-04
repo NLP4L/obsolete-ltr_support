@@ -53,3 +53,4 @@ POST          /ltr/annotation/$ltrid<[0-9]+>/save/$qid<[0-9]+>         @org.nlp4
 GET           /ltr/feature/$ltrid<[0-9]+>                              @org.nlp4l.ltr.support.controllers.LtrController.startFeatureEtraction(ltrid: Int)
 GET           /ltr/feature/$ltrid<[0-9]+>/progress                     @org.nlp4l.ltr.support.controllers.LtrController.getFeatureProgress(ltrid: Int)
 GET           /ltr/feature/$ltrid<[0-9]+>/clear                        @org.nlp4l.ltr.support.controllers.LtrController.clearFeatureProgress(ltrid: Int)
+

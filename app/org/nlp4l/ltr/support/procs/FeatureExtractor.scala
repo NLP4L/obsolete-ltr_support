@@ -30,11 +30,12 @@ import scala.util.Random
 import akka.actor.ActorRef
 import play.api.Logger
 import org.nlp4l.ltr.support.actors.FeatureProgressReport
+import org.nlp4l.ltr.support.models.Ltrconfig
 
 
 
 class FeatureExtractor(sender: ActorRef) extends FeatureProgressReport {
-  override def execute(ltrid: Int) = {
+  override def execute(ltr: Ltrconfig) = {
     // TODO feature extraction
     
     // DEMO
@@ -43,7 +44,7 @@ class FeatureExtractor(sender: ActorRef) extends FeatureProgressReport {
     do {
       FeatureProgress.add(Random.nextInt(10))
       progressV = FeatureProgress.get()
-      report(ltrid, sender, progressV)
+      report(ltr.ltrid.getOrElse(0), sender, progressV)
       Thread.sleep(1000)
     } while (progressV < 100)
   }

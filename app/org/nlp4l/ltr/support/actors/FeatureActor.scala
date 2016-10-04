@@ -30,6 +30,7 @@ import scala.util.Random
 import akka.actor.ActorRef
 import play.api.Logger
 import org.nlp4l.ltr.support.procs.FeatureExtractor
+import org.nlp4l.ltr.support.models.Ltrconfig
 
 
 trait FeatureProgressReport {
@@ -40,7 +41,7 @@ trait FeatureProgressReport {
     to ! ProgressSetMsg_Feature(ltrid, progressValue)
   }
   
-  def execute(ltrid: Int)
+  def execute(ltr: Ltrconfig)
 
 }
 
@@ -48,10 +49,10 @@ class FeatureActor extends Actor {
   private val logger = Logger(this.getClass)
   
   override def receive: Receive = {
-    case StartMsg_Feature(ltrid: Int) => {
+    case StartMsg_Feature(ltr: Ltrconfig) => {
       val featureExtraction = new FeatureExtractor(sender)
-      logger.info("FeatureStartMsg received: " + ltrid)
-      featureExtraction.execute(ltrid)
+      logger.info("FeatureStartMsg received: " + ltr.ltrid)
+      featureExtraction.execute(ltr)
     }
   }
 }
