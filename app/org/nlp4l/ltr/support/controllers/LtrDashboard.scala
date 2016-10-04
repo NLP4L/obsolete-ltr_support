@@ -85,17 +85,28 @@ class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO,
   }
   
   
-  def annotation(ltrid: Int, qid: Int) = Action {
+  def annotation(ltrid: Int) = Action {
     val ltr = getLtr(ltrid)
     val menubars = buildMenubars(ltrid)
-    val ltrquery =ltrqueryDAO.fetchOrNext(ltrid, qid) match {
+    val ltrquery =ltrqueryDAO.fetchNext(ltrid, 0) match {
       case Some(x) => Some(x)
       case _ => Some(Ltrquery(Some(0), "", ltrid, false))
     }
     Ok(org.nlp4l.ltr.support.views.html.annotation(ltrid,menubars,ltr,ltrquery,"",""))
   }
-  
-  
+
+  def editAnnotation(ltrid: Int, qid: Int) = Action {
+    val ltr = getLtr(ltrid)
+    val menubars = buildMenubars(ltrid)
+    val f = ltrqueryDAO.get(qid)
+    Await.ready(f, scala.concurrent.duration.Duration.Inf)
+    val ltrquery = f.value.get match {
+      case Success(x) => Some(x)
+      case Failure(ex) => Some(Ltrquery(Some(0), "", ltrid, false))
+    }
+    Ok(org.nlp4l.ltr.support.views.html.annotation(ltrid,menubars,ltr,ltrquery,"",""))
+  }
+
   def feature(ltrid: Int) = Action {
     val ltr = getLtr(ltrid)
     val menubars = buildMenubars(ltrid)

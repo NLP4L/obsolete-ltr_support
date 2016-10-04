@@ -29,6 +29,9 @@ import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import dispatch.Http
 import dispatch.as
 import dispatch.url
+import dispatch._
+
+import scala.util.{Success, Failure}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -37,26 +40,58 @@ class SolrSearch(val searchUrl: String) {
   def search(queryStr: String): SolrSearchResponse = {
     val searchUrlQuery = searchUrl.replaceAll("\\$\\{query\\}", URLEncoder.encode(queryStr, "UTF-8"))
     val req = url(searchUrlQuery)
-    val f = Http(req OK as.String)
+    val f = Http(req > as.String)
     val res = Await.result(f, scala.concurrent.duration.Duration.Inf)
-    new SolrSearchResponse(res)
+    try {
+      new SolrSearchResponse(res)
+    }
+    catch {
+      case e: Exception => throw new Exception(res)
+    }
   }
 }
 
 class SolrSearchResponse(val jsonString: String) {
   val json: JsValue = Json.parse(jsonString)
 
-  val numFound = (json \ "response" \ "numFound").as[Long]
+  val status = (json \ "responseHeader" \ "status").as[Int]
 
-  val docsList: Seq[SolrSearchResultDocument] = (json \ "response" \ "docs").as[Seq[JsObject]].map(
-    new SolrSearchResultDocument(_)
-  )
-}
+  def statusSuccess(): Boolean = {
+    status == 0
+  }
+  def errorMsg(): String = {
+    (json \ "error" \ "msg").as[String]
+  }
 
-class SolrSearchResultDocument(val doc: JsObject) {
+  def docs(): Seq[JsObject] = {
+    (json \ "response" \ "docs").as[Seq[JsObject]]
+  }
 
-  def getFirstValueAsString(name: String): String = {
-    val v = doc.value.get(name)
+  def getHighlighting(uk : String, name: String): String = {
+    val v = (json \ "highlighting" \ uk ).asOpt[JsObject]
+    v match {
+      case Some(x) =>
+        getValueAsString(x, name, "...")
+      case None => null
+    }
+  }
+
+  def getValueAsString(value : JsObject, name: String, separator: String): String = {
+    val v = value.value.get(name)
+    v match {
+      case Some(x) =>
+        if (x.isInstanceOf[JsArray]) {
+          val seq = x.as[Seq[JsValue]]
+          if (seq.nonEmpty) seq.map(_.as[String]).mkString(separator) else null
+        } else {
+          x.as[String]
+        }
+      case None => null
+    }
+  }
+
+  def getFirstValueAsString(value : JsObject, name: String): String = {
+    val v = value.value.get(name)
     v match {
       case Some(x) =>
         if (x.isInstanceOf[JsArray]) {
@@ -69,3 +104,4 @@ class SolrSearchResultDocument(val doc: JsObject) {
     }
   }
 }
+
