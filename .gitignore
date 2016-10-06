@@ -5,8 +5,14 @@ target/
 /.classpath
 /.project
 /.settings
-/.cache-main
 /RUNNING_PID
 /lib/
 /bin/
 conf/application.conf
+
+# Scala-IDE
+.scala_dependencies
+.project
+.settings
+.cache-main
+.cache-tests
