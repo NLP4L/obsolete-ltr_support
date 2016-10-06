@@ -80,6 +80,8 @@ case class DocFeature (
  */
 case class Ltrmodel (
     mid: Option[Int],
+    ltrid: Int,
+    runid: Int,
     feature_list: String,
     model_data: String,
     status: Int,

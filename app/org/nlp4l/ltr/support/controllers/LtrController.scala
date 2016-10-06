@@ -130,6 +130,13 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
   }
 
   def deleteLtrConfig(ltrid: Int) = Action.async {
+    ltrqueryDAO.clearCheckedFlg(ltrid)
+    val queryList = ltrqueryDAO.fetchByLtrid(ltrid, "qid", "asc", 0, Integer.MAX_VALUE)
+    queryList.foreach(q => {
+      ltrannotationDAO.deleteByQid(q.qid.get)
+      val f: Future[Int] = ltrqueryDAO.delete(q.qid.get)
+      Await.ready(f, scala.concurrent.duration.Duration.Inf)
+    })
     val f: Future[Ltrconfig] = ltrconfigDAO.get(ltrid)
     val ltr = Await.result(f, scala.concurrent.duration.Duration.Inf)
     ltrconfigDAO.delete(ltrid) map {
@@ -160,13 +167,22 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     Redirect("/ltrdashboard/" + ltrid + "/query")
   }
 
-  def clearAnnotation(ltrid: Int) = Action { request =>
+  def clearAllAnnotation(ltrid: Int) = Action { request =>
     ltrqueryDAO.clearCheckedFlg(ltrid)
     val queryList = ltrqueryDAO.fetchByLtrid(ltrid, "qid", "asc", 0, Integer.MAX_VALUE)
     queryList.foreach(q => {
       ltrannotationDAO.deleteByQid(q.qid.get)
     })
     Redirect("/ltrdashboard/" + ltrid + "/query")
+  }
+
+  def clearAnnotation(ltrid: Int, qid : Int) = Action { request =>
+    ltrannotationDAO.deleteByQid(qid)
+    val fq: Future[Ltrquery] = ltrqueryDAO.get(qid)
+    val ltrquery = Await.result(fq, scala.concurrent.duration.Duration.Inf)
+    val fu: Future[Int] = ltrqueryDAO.update(ltrquery.copy(checked_flg = false))
+    Await.ready(fu, scala.concurrent.duration.Duration.Inf)
+    Ok(Json.toJson(ActionResult(true, Seq("cleared"))))
   }
 
   def listQuery(ltrid: Int) = Action { request =>
@@ -237,7 +253,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
         val titleText =
           if (titleTextHL != null) titleTextHL
           else {
-            val titleText = solrRes.getValueAsString(doc, titleField, "<br>")
+            val titleText = solrRes.getValueAsString(doc, titleField, "...")
             if (titleText == null) ""
             else titleText
           }
@@ -245,13 +261,10 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
         val bodyText =
           if (bodyTextHL != null) bodyTextHL
           else {
-            val bodyText = solrRes.getValueAsString(doc, bodyField, "<br>")
+            val bodyText = solrRes.getValueAsString(doc, bodyField, "...")
             if (bodyText == null) ""
-            else if (bodyText.length > 300) {
-              val idx = bodyText.substring(290, 300).indexOf("<")
-              val bodyTextShort = if (idx > -1) bodyText.take(290+idx) else bodyText.take(300)
-              bodyTextShort + "..."
-            } else bodyText
+            else if (bodyText.length > 300) bodyText.take(300) + "..."
+            else bodyText
           }
         Json.obj(
           "id" -> idText,

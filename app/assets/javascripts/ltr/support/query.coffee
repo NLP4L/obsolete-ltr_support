@@ -39,3 +39,37 @@ $ ->
     $('#uploadform').attr('action', action)
     $('#uploadform').attr('method', 'POST')
     $('#uploadform').submit()
+
+
+  $('#clearEach').click ->
+      elems = $('input[name="btSelectItem"]')
+      clearIds = []
+      for e in elems
+        if e.checked
+          id = e.value
+          clearurl = '/ltr/query/' + ltrid + '/clear/' + id
+          $.ajax
+            url: clearurl,
+            type: 'POST',
+            async: false,
+            success: (data) ->
+              clearIds.push id
+              ret = data
+      $table.bootstrapTable('refresh');
+      $('#clearEachModal').modal('hide');
+
+  $('#deleteEach').click ->
+    elems = $('input[name="btSelectItem"]')
+    delIds = []
+    for e in elems
+      if e.checked
+        id = e.value
+        delurl = '/ltr/query/' + ltrid + '/delete/' + id
+        $.ajax
+          url: delurl,
+          type: 'DELETE',
+          async: false,
+          success: (data) ->
+            delIds.push id
+    $table.bootstrapTable('refresh');
+    $('#deleteEachModal').modal('hide');
