@@ -30,6 +30,8 @@ import java.util.Random
 import akka.actor.ActorRef
 import play.api.Logger
 import org.nlp4l.ltr.support.models.Ltrconfig
+import org.nlp4l.ltr.support.models.FeatureExtractDTOs
+import org.nlp4l.ltr.support.models.FeatureExtractResults
 
 
 
@@ -43,23 +45,27 @@ class ProgressActor @Inject()(jdocFeatureDAO: DocFeatureDAO,
   private val logger = Logger(this.getClass)
   
   override def receive: Receive = {
-    case StartMsg_Feature(ltr: Ltrconfig) => {
-      context.actorOf(Props[FeatureActor]) ! StartMsg_Feature(ltr)
+    case FeatureExtractStartMsg(dtos: FeatureExtractDTOs) => {
+      context.actorOf(Props[FeatureActor]) ! FeatureExtractStartMsg(dtos)
     }
-    case ProgressSetMsg_Feature(ltrid: Int, value: Int) => {
-      logger.info("ProgressSetMsg_Feature received: " + ltrid + " [" + value + "]")
+    case FeatureExtractSetProgressMsg(ltrid: Int, value: Int) => {
+      logger.info("FeatureExtractSetProgressMsg received: " + ltrid + " [" + value + "]")
       // TODO DB store
       // DEMO
       FeatureProgressDB.set(ltrid, value)
     }
-    case ProgressGetMsg_Feature(ltrid: Int) => {
+    case FeatureExtractGetProgressMsg(ltrid: Int) => {
       // TODO DB retrieve
       // DEMO
       val n = FeatureProgressDB.get(ltrid)
-      logger.info("ProgressGetMsg_Feature received: " + ltrid + " [" + n + "]")
+      logger.info("FeatureExtractGetProgressMsg received: " + ltrid + " [" + n + "]")
       sender ! n
     }
-    case ClearMsg_Feature(ltrid: Int) => {
+    case FeatureExtractSetResultMsg(ltrid: Int, result: FeatureExtractResults) => {
+      logger.info("FeatureExtractSetProgressMsg received: " + ltrid + " [" + result + "]")
+      // TODO DB store
+    }
+    case FeatureExtractClearResultMsg(ltrid: Int) => {
       // TODO DB retrieve
       // DEMO
       val n = FeatureProgressDB.set(ltrid, 0)
@@ -72,13 +78,15 @@ object ProgressActor {
 }
 
 // Start a feature extraction
-case class StartMsg_Feature(ltr: Ltrconfig)
+case class FeatureExtractStartMsg(dtos: FeatureExtractDTOs)
 // Set a progress value of the feature extraction
-case class ProgressSetMsg_Feature(ltrid: Int, value: Int)
+case class FeatureExtractSetProgressMsg(ltrid: Int, value: Int)
 // Get a progress value of the feature extraction
-case class ProgressGetMsg_Feature(ltrid: Int)
+case class FeatureExtractGetProgressMsg(ltrid: Int)
+// Set the result of the feature extraction
+case class FeatureExtractSetResultMsg(ltrid: Int, result: FeatureExtractResults)
 // Clear a result of the feature extraction
-case class ClearMsg_Feature(ltrid: Int)
+case class FeatureExtractClearResultMsg(ltrid: Int)
 
 
 // DEMO

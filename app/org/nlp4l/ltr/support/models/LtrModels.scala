@@ -20,20 +20,44 @@ import play.api.libs.json.JsValue
 import play.api.libs.json.Json
 import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.api.libs.json.Writes
+import play.api.libs.json._
 
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
+import play.api.libs.json.Reads
+import play.api.libs.json.JsPath
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
+
 
 /**
- * Ltrconfig Table
+ * Basic dto class for feature extraction
  */
-case class FeatureExtractDTO (
-    qid: Int, 
-    query: String, 
-    docs: List[String]
+case class FeatureExtractDTO(
+  qid: Int,
+  query: String,
+  docs: List[String])
+
+case class FeatureExtractDTOs(
+  ltrid: Int,
+  featureExtractUrl: String,
+  featureProgressUrl: String,
+  featureRetrieveUrl: String,
+  dtos: List[FeatureExtractDTO]
 )
 
+case class FeatureExtractResult (
+    fid: Int,
+    qid: Int,
+    docid: String,
+    value: Float
+)
 
+case class FeatureExtractResults (
+  procid: Int,
+  progress: Int,
+  results: List[FeatureExtractResult]
+)
 
 object LtrModels {
 
@@ -42,15 +66,46 @@ object LtrModels {
       Json.obj(
         "qid" -> d.qid,
         "query" -> d.query,
-        "docs" -> d.docs
-      )
+        "docs" -> d.docs)
   }
-  
-  implicit val fWFeatureExtractDTOListWrites = new Writes[List[FeatureExtractDTO]] {
-    override def writes(d: List[FeatureExtractDTO]): JsValue =
+
+  implicit val fWFeatureExtractDTOsWrites = new Writes[FeatureExtractDTOs] {
+    override def writes(d: FeatureExtractDTOs): JsValue =
       Json.obj(
-        "queries" -> d
-      )
+        "queries" -> d.dtos)
   }
   
+  
+
+  implicit val fWFeatureExtractResultReads: Reads[FeatureExtractResult] = (
+    (JsPath \ "fid").read[Int] and
+    (JsPath \ "qid").read[Int] and
+    (JsPath \ "docid").read[String] and
+    (JsPath \ "value").read[Float])(FeatureExtractResult.apply _)
+  
+  implicit val fWFeatureExtractResultsReads: Reads[FeatureExtractResults] = (
+    (JsPath \ "progress").read[Int] and
+    (JsPath \ "procid").read[Int] and
+    (JsPath \ "results").read[List[FeatureExtractResult]])(FeatureExtractResults.apply _)
+
+
+  implicit val fWFeatureExtractResultWrites = new Writes[FeatureExtractResult] {
+    override def writes(d: FeatureExtractResult): JsValue =
+      Json.obj(
+        "fid" -> d.qid,
+        "qid" -> d.qid,
+        "docid" -> d.docid,
+        "value" -> d.value)
+  }
+  
+  implicit val fWFeatureExtractResultsWrites = new Writes[FeatureExtractResults] {
+    override def writes(d: FeatureExtractResults): JsValue =
+      Json.obj(
+        "progress" -> d.progress,
+        "procid" -> d.procid,
+        "results" -> d.results)
+  }
+
 }
+
+

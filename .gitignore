@@ -14,5 +14,5 @@ conf/application.conf
 .scala_dependencies
 .project
 .settings
-.cache-main
 .cache-tests
+.cache-main

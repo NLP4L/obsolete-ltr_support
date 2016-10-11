@@ -82,7 +82,7 @@
           			<label class="col-sm-2 control-label" for="annotationType">Annotation Type</label>
           			<div class="col-sm-10">
           				<select class="form-control" id="annotationType" required >
-          					<option value="pointwise"驍ｵ�ｽｲ�ｿｽ�ｽｿ�ｽｽ@if(ltr.map(d => d.annotationType).getOrElse("") == "pointwise") { selected }>pointwise</option>
+          					<option value="pointwise"鬩搾ｽｵ�ｿｽ�ｽｽ�ｽｲ�ｿｽ�ｽｿ�ｽｽ�ｿｽ�ｽｽ�ｽｿ�ｿｽ�ｽｽ�ｽｽ@if(ltr.map(d => d.annotationType).getOrElse("") == "pointwise") { selected }>pointwise</option>
           				</select>
           			</div>
           		</div>
@@ -137,7 +137,7 @@
           		<div class="form-group">
           			<label class="col-sm-2 control-label" for="featureProgressUrl">Feature Progress URL</label>
           			<div class="col-sm-10">
-          				<input type="text" class="form-control" id="featureProgressUrl" value="@ltr.map(d => d.featureProgressUrl).getOrElse("http://localhost:8983/solr/collection1/features?command=progress&id={procId}")" required />
+          				<input type="text" class="form-control" id="featureProgressUrl" value="@ltr.map(d => d.featureProgressUrl).getOrElse("http://localhost:8983/solr/collection1/features?command=progress&id={procid}")" required />
           			</div>
           		</div>
           	</div><!-- row -->
@@ -145,7 +145,7 @@
           		<div class="form-group">
           			<label class="col-sm-2 control-label" for="featureRetrieveUrl">Feature Retrieve URL</label>
           			<div class="col-sm-10">
-          				<input type="text" class="form-control" id="featureRetrieveUrl" value="@ltr.map(d => d.featureRetrieveUrl).getOrElse("http://localhost:8983/solr/collection1/features?command=download&id={procId}")" required />
+          				<input type="text" class="form-control" id="featureRetrieveUrl" value="@ltr.map(d => d.featureRetrieveUrl).getOrElse("http://localhost:8983/solr/collection1/features?command=download&id={procid}")" required />
           			</div>
           		</div>
           	</div><!-- row -->

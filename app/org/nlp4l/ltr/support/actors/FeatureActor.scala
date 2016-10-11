@@ -31,6 +31,7 @@ import akka.actor.ActorRef
 import play.api.Logger
 import org.nlp4l.ltr.support.procs.FeatureExtractor
 import org.nlp4l.ltr.support.models.Ltrconfig
+import org.nlp4l.ltr.support.models.FeatureExtractDTOs
 
 
 trait FeatureProgressReport {
@@ -38,10 +39,8 @@ trait FeatureProgressReport {
   
   def report(ltrid: Int, to: ActorRef, progressValue: Int): Unit = {
     logger.info("FeatureSetMsg received: " + ltrid + " [" + progressValue + "]")
-    to ! ProgressSetMsg_Feature(ltrid, progressValue)
+    to ! FeatureExtractSetProgressMsg(ltrid, progressValue)
   }
-  
-  def execute(ltr: Ltrconfig)
 
 }
 
@@ -49,10 +48,10 @@ class FeatureActor extends Actor {
   private val logger = Logger(this.getClass)
   
   override def receive: Receive = {
-    case StartMsg_Feature(ltr: Ltrconfig) => {
+    case FeatureExtractStartMsg(dtos: FeatureExtractDTOs) => {
       val featureExtraction = new FeatureExtractor(sender)
-      logger.info("FeatureStartMsg received: " + ltr.ltrid)
-      featureExtraction.execute(ltr)
+      logger.info("FeatureStartMsg received: " + dtos.ltrid)
+      featureExtraction.execute(dtos)
     }
   }
 }

@@ -32,9 +32,9 @@ import scala.concurrent.duration.Duration
 import scala.util.Failure
 import scala.util.Success
 
-import org.nlp4l.ltr.support.actors.ClearMsg_Feature
-import org.nlp4l.ltr.support.actors.ProgressGetMsg_Feature
-import org.nlp4l.ltr.support.actors.StartMsg_Feature
+import org.nlp4l.ltr.support.actors.FeatureExtractClearResultMsg
+import org.nlp4l.ltr.support.actors.FeatureExtractGetProgressMsg
+import org.nlp4l.ltr.support.actors.FeatureExtractStartMsg
 import org.nlp4l.ltr.support.dao.DocFeatureDAO
 import org.nlp4l.ltr.support.dao.FeatureDAO
 import org.nlp4l.ltr.support.dao.LtrannotationDAO
@@ -69,6 +69,7 @@ import play.api.libs.json.Json
 import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.api.mvc.Action
 import play.api.mvc.Controller
+import org.nlp4l.ltr.support.models.FeatureExtractDTOs
 
 class LtrController @Inject()(docFeatureDAO: DocFeatureDAO, 
                              featureDAO: FeatureDAO, 
@@ -321,17 +322,31 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
   def startFeatureEtraction(ltrid: Int) = Action {
     val f: Future[Ltrconfig] = ltrconfigDAO.get(ltrid)
     val ltr = Await.result(f, scala.concurrent.duration.Duration.Inf)
-    progressActor ! StartMsg_Feature(ltr)
+    
+    val qCount = ltrqueryDAO.totalCountByLtrid(ltrid)
+    val qlistf = ltrqueryDAO.fetch("qid", "asc", 0, qCount)
+    val qlist = Await.result(qlistf, scala.concurrent.duration.Duration.Inf)
+    
+    var dtos: List[FeatureExtractDTO] = List()
+    qlist.map { q =>
+      val docsf = ltrannotationDAO.getByQid(q.qid.getOrElse(0))
+      val docs = Await.result(docsf, scala.concurrent.duration.Duration.Inf)
+      val dto: FeatureExtractDTO = FeatureExtractDTO(q.qid.getOrElse(0), q.query, docs.map(_.docid).toList)
+      dtos :+ dto
+    }
+    val fedtos = FeatureExtractDTOs(ltr.ltrid.getOrElse(0), ltr.featureExtractUrl, ltr.featureProgressUrl, ltr.featureRetrieveUrl, dtos)
+    
+    progressActor ! FeatureExtractStartMsg(fedtos)
     Ok(Json.toJson(ActionResult(true, Seq("started"))))
   }
   
   def getFeatureProgress(ltrid: Int) = Action.async {
-    val f = pa ? ProgressGetMsg_Feature(ltrid)
+    val f = pa ? FeatureExtractGetProgressMsg(ltrid)
     f.map(result => Ok(result.toString()))
   }
 
   def clearFeatureProgress(ltrid: Int) = Action {
-    progressActor ! ClearMsg_Feature(ltrid)
+    progressActor ! FeatureExtractClearResultMsg(ltrid)
     Ok(Json.toJson(ActionResult(true, Seq("cleared"))))
   }
   

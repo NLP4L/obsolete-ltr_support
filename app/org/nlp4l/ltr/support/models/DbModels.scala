@@ -24,6 +24,8 @@ import play.api.libs.json.Writes
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 
+
+  
 /**
  * Ltrconfig Table
  */
@@ -73,6 +75,7 @@ case class DocFeature (
     docid: String,
     value: Float
 )
+
 
 
 /**
