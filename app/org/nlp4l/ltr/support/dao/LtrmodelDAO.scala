@@ -41,13 +41,15 @@ class LtrmodelDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
   
   class LtrmodelTable(tag: Tag) extends Table[Ltrmodel](tag, "ltrmodels") {
     def mid = column[Int]("mid", O.PrimaryKey, O.AutoInc)
+    def ltrid = column[Int]("ltrid")
+    def runid = column[Int]("runid")
     def feature_list = column[String]("feature_list")
     def model_data = column[String]("model_data")
     def status = column[Int]("status")
     def progress = column[Int]("progress")
     def started_at = column[Option[DateTime]]("started_at")
     def finished_at = column[Option[DateTime]]("finished_at")
-    def * = (mid.?, feature_list, model_data, status, progress, started_at, finished_at) <> (Ltrmodel.tupled, Ltrmodel.unapply)
+    def * = (mid.?, ltrid, runid, feature_list, model_data, status, progress, started_at, finished_at) <> (Ltrmodel.tupled, Ltrmodel.unapply)
   }
 
   val ltrmodels = TableQuery[LtrmodelTable]
