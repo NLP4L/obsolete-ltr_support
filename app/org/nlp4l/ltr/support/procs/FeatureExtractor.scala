@@ -58,8 +58,8 @@ class FeatureExtractor(sender: ActorRef) extends FeatureProgressReport {
     
     // Progress
     val s_res_json: JsValue = Json.parse(s_res)
-    val procid = (s_res_json \ "results" \ "procid").as[String]
-    val progressUrl = dtos.featureProgressUrl.replaceAll("\\$\\{procid\\}", URLEncoder.encode(procid, "UTF-8"))
+    val procid = (s_res_json \ "results" \ "procid").as[Long]
+    val progressUrl = dtos.featureProgressUrl.replaceAll("\\$\\{procid\\}", procid.toString)
     val p_req = url(progressUrl)
     
     var progressV: Int = 0
@@ -67,17 +67,18 @@ class FeatureExtractor(sender: ActorRef) extends FeatureProgressReport {
       val p_f = Http(p_req OK as.String)
       val p_res = Await.result(p_f, scala.concurrent.duration.Duration.Inf)
       val p_res_json: JsValue = Json.parse(p_res)
-      progressV = (p_res_json \ "progress").as[Int]
+      progressV = (p_res_json \ "results" \ "progress").as[Int]
       report(dtos.ltrid, sender, progressV)
       Thread.sleep(1000)
     } while (progressV < 100)
       
     // Save
-    val retrieveUrl = dtos.featureRetrieveUrl.replaceAll("\\$\\{procid\\}", URLEncoder.encode(procid, "UTF-8"))
+    val retrieveUrl = dtos.featureRetrieveUrl.replaceAll("\\$\\{procid\\}", procid.toString)
     val r_req = url(retrieveUrl)
     val r_f = Http(r_req OK as.String)
     val r_res = Await.result(r_f, scala.concurrent.duration.Duration.Inf)
-    val r_result: FeatureExtractResults = Json.parse(r_res).validate[FeatureExtractResults].get
+    val r_result: FeatureExtractResults = (Json.parse(r_res) \ "results").as[FeatureExtractResults]
+    //val r_result: FeatureExtractResults = Json.parse(r_res).validate[FeatureExtractResults].get
     sender ! FeatureExtractSetResultMsg(dtos.ltrid, r_result)
       
   }

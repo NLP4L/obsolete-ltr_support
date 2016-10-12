@@ -16,18 +16,15 @@
 
 package org.nlp4l.ltr.support.models
 
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
+import play.api.libs.json._
+import play.api.libs.json.JsPath
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json
 import play.api.libs.json.Json.toJsFieldJsValueWrapper
-import play.api.libs.json.Writes
-import play.api.libs.json._
-
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
 import play.api.libs.json.Reads
-import play.api.libs.json.JsPath
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
+import play.api.libs.json.Writes
 
 
 /**
@@ -55,7 +52,7 @@ case class FeatureExtractResult (
 
 case class FeatureExtractResults (
   procid: Int,
-  progress: Int,
+  progress: Long,
   results: List[FeatureExtractResult]
 )
 
@@ -85,7 +82,7 @@ object LtrModels {
   
   implicit val fWFeatureExtractResultsReads: Reads[FeatureExtractResults] = (
     (JsPath \ "progress").read[Int] and
-    (JsPath \ "procid").read[Int] and
+    (JsPath \ "procid").read[Long] and
     (JsPath \ "results").read[List[FeatureExtractResult]])(FeatureExtractResults.apply _)
 
 

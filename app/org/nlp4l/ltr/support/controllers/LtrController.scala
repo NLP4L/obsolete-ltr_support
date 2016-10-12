@@ -345,7 +345,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
       val docsf = ltrannotationDAO.getByQid(q.qid.getOrElse(0))
       val docs = Await.result(docsf, scala.concurrent.duration.Duration.Inf)
       val dto: FeatureExtractDTO = FeatureExtractDTO(q.qid.getOrElse(0), q.query, docs.map(_.docid).toList)
-      dtos :+ dto
+      dtos = dtos :+ dto
     }
     val fedtos = FeatureExtractDTOs(ltr.ltrid.getOrElse(0), ltr.featureExtractUrl, ltr.featureProgressUrl, ltr.featureRetrieveUrl, dtos)
     
