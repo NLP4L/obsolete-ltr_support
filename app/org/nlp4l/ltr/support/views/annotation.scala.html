@@ -113,12 +113,12 @@
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-body">
-                   <table id="more_table" class="table"></table>
-              </div>
-              <div class="modal-footer">
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              </div>
-            </div>
+                <div id ="starsMore"  class="pull-right"></div>
+                <br>
+                <br>
+                <table id="more_table" class="table"></table>
+             </div>
+         </div>
       </div>
   </div>
 
@@ -212,11 +212,58 @@ function onClickStar(row, label) {
 	}
 }
 
+var starsOnMoreModal;
+
+function onClickStarOnMoreModal(label) {
+    var changeToOn = (starsOnMoreModal[label] == 0);
+    for (j=1;j <= 5;j++) {
+      var elm = document.getElementById("star_more_" + j);
+      if (j < label || (j == label && changeToOn)) {
+  	    starsOnMoreModal[j] = 1;
+        elm.style.cssText = 'color:red;';
+  	  } else {
+  		starsOnMoreModal[j] = 0;
+        elm.style.cssText = 'color:lightgray;';
+  	  }
+	}
+}
+
+function onClickOKOnMoreModal(row) {
+    for (j=1;j <= 5;j++) {
+        stars[row][j] = starsOnMoreModal[j]
+        var elm = document.getElementById("star_" + row + "_" + j);
+        if (stars[row][j] == 1) {
+            elm.style.cssText = 'color:red;';
+        } else {
+            elm.style.cssText = 'color:lightgray;';
+        }
+    }
+}
+
 $('#moreModal').on('show.bs.modal', function (event) {
     var table = document.getElementById("more_table");
     while( table.rows[ 0 ] ) table.deleteRow( 0 );
     var button = $(event.relatedTarget);
     var rowIdx = button.data('row');
+    //
+    starsOnMoreModal = stars[rowIdx].concat();
+    var label = 0;
+    for (var j=1; j<=starsOnMoreModal.length; j++) {
+        if (starsOnMoreModal[j] == 1) label++;
+    }
+    var labelHtml = "";
+    for (var j=1 ; j<=labelMax ; j++){
+        var color;
+        if (label < j)
+            color = 'color:lightgray;'
+        else
+            color = 'color:red;'
+        labelHtml = labelHtml + "<button type=\"button\" class=\"btn btn-default btn-xs\" onclick='onClickStarOnMoreModal(" + j + ");'><span id=\"star_more_" + j + "\" class=\"glyphicon glyphicon-star\" style=\"" + color + "\" aria-hidden=\"true\"></span></button>";
+    }
+    labelHtml = labelHtml + "&nbsp;&nbsp;<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\" onclick='onClickOKOnMoreModal(" + rowIdx + ");'>OK</button>";
+    labelHtml = labelHtml + "&nbsp;<button type=\"button\" class=\"btn btn-primary\" data-dismiss=\"modal\">Cancel</button>";
+    $("#starsMore").html(labelHtml);
+    //
     var docid = stars[rowIdx][0];
     var url = "/ltr/annotation/@currentLtrid/searchById?id=" + encodeURIComponent(docid);
     $.getJSON(url, function(data) {

@@ -17,6 +17,8 @@
 package org.nlp4l.ltr.support.controllers
 
 import java.net.URLEncoder
+import java.net.URL
+import java.net.URI
 
 import scala.concurrent.Await
 
@@ -38,7 +40,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class SolrSearch(val searchUrl: String) {
 
   def search(queryStr: String): SolrSearchResponse = {
-    val searchUrlQuery = searchUrl.replaceAll("\\$\\{query\\}", URLEncoder.encode(queryStr, "UTF-8"))
+//    val searchUrlQuery = searchUrl.replaceAll("\\$\\{query\\}", URLEncoder.encode(queryStr, "UTF-8"))
+    val searchUrlQuery = encodeUrl(searchUrl.replaceAll("\\$\\{query\\}", queryStr))
     val req = url(searchUrlQuery)
     val f = Http(req > as.String)
     val res = Await.result(f, scala.concurrent.duration.Duration.Inf)
@@ -48,6 +51,17 @@ class SolrSearch(val searchUrl: String) {
     catch {
       case e: Exception => throw new Exception(res)
     }
+  }
+  def encodeUrl(s: String): String = {
+    val u = new URL(s)
+    val uri = new URI(
+      u.getProtocol(),
+      u.getAuthority(),
+      u.getPath(),
+      u.getQuery(),
+      u.getRef()).
+      toURL()
+    uri.toString;
   }
 }
 
