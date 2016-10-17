@@ -44,7 +44,7 @@ class LtrmodelDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
     def ltrid = column[Int]("ltrid")
     def runid = column[Int]("runid")
     def feature_list = column[String]("feature_list")
-    def model_data = column[String]("model_data")
+    def model_data = column[Option[String]]("model_data")
     def status = column[Int]("status")
     def progress = column[Int]("progress")
     def started_at = column[Option[DateTime]]("started_at")
@@ -93,7 +93,11 @@ class LtrmodelDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
     }
   }
 
-  
-  
+  def fetchByLtrid(ltrid: Int): Future[Seq[Ltrmodel]] = {
+    db.run(ltrmodels.filter(_.ltrid === ltrid).sortBy(_.mid.asc).result)
+  }
 
+  def nextRunId(ltrid: Int): Future[Int] = {
+    db.run(sql"select max(runid)+1 as n from ltrmodels".as[Int].head)
+  }
 }

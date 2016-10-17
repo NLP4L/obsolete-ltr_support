@@ -45,14 +45,9 @@ import org.nlp4l.ltr.support.dao.LtrqueryDAO
 import org.nlp4l.ltr.support.models.ActionResult
 import org.nlp4l.ltr.support.models.FeatureExtractDTO
 import org.nlp4l.ltr.support.models.Ltrannotation
-import org.nlp4l.ltr.support.models.Ltrannotation
-import org.nlp4l.ltr.support.models.Ltrannotation
-import org.nlp4l.ltr.support.models.Ltrconfig
-import org.nlp4l.ltr.support.models.Ltrconfig
 import org.nlp4l.ltr.support.models.Ltrconfig
 import org.nlp4l.ltr.support.models.Ltrquery
-import org.nlp4l.ltr.support.models.Ltrquery
-import org.nlp4l.ltr.support.models.Ltrquery
+import org.nlp4l.ltr.support.models.Ltrmodel
 import org.nlp4l.ltr.support.models.ViewModels._
 import org.nlp4l.ltr.support.models.DbModels._
 import org.nlp4l.ltr.support.models.LtrModels._
@@ -362,7 +357,23 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     progressActor ! FeatureExtractClearResultMsg(ltrid)
     Ok(Json.toJson(ActionResult(true, Seq("cleared"))))
   }
-  
+
+  def startModelCreation(ltrid: Int) = Action { request =>
+    val f: Future[Ltrconfig] = ltrconfigDAO.get(ltrid)
+    val ltr = Await.result(f, scala.concurrent.duration.Duration.Inf)
+    val fr: Future[Int] = ltrmodelDAO.nextRunId(ltrid)
+    val runid = Await.result(fr, scala.concurrent.duration.Duration.Inf)
+    val feature_list = request.getQueryString("features").get
+    val newModel: Ltrmodel = Ltrmodel(None,ltrid,runid,feature_list,None,0,0,None,None)
+    val fm: Future[Ltrmodel] = ltrmodelDAO.insert(newModel)
+    val res = Await.result(fm, scala.concurrent.duration.Duration.Inf)
+    val jsonResponse = Json.obj(
+      "mid" -> res.mid.get
+    )
+    Ok(jsonResponse)
+  }
+
+
 }
 
 

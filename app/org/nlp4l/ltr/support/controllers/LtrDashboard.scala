@@ -28,6 +28,8 @@ import org.nlp4l.ltr.support.dao.LtrannotationDAO
 import org.nlp4l.ltr.support.dao.LtrqueryDAO
 import org.nlp4l.ltr.support.models.Ltrconfig
 import org.nlp4l.ltr.support.models.Ltrquery
+import org.nlp4l.ltr.support.models.Ltrmodel
+import org.nlp4l.ltr.support.models.Feature
 import scala.concurrent.Await
 import org.nlp4l.ltr.support.models.Menubar
 import scala.util.Failure
@@ -112,15 +114,35 @@ class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO,
     val menubars = buildMenubars(ltrid)
     Ok(org.nlp4l.ltr.support.views.html.feature(ltrid,menubars,ltr,"",""))
   }
-  
+
   def model(ltrid: Int) = Action {
     val ltr = getLtr(ltrid)
     val menubars = buildMenubars(ltrid)
-    Ok(org.nlp4l.ltr.support.views.html.model(ltrid,menubars,ltr,"",""))
+    val f = ltrmodelDAO.fetchByLtrid(ltrid)
+    val ltrmodels: Seq[Ltrmodel] = Await.result(f, scala.concurrent.duration.Duration.Inf)
+    Ok(org.nlp4l.ltr.support.views.html.model(ltrid,menubars,ltr,ltrmodels,"",""))
   }
-  
-  
-  
+
+  def newModel(ltrid: Int) = Action {
+    val ltr = getLtr(ltrid)
+    val menubars = buildMenubars(ltrid)
+    val f = ltrmodelDAO.fetchByLtrid(ltrid)
+    val ltrmodels: Seq[Ltrmodel] = Await.result(f, scala.concurrent.duration.Duration.Inf)
+    val ff = featureDAO.fetchByLtrid(ltrid)
+    val features: Seq[Feature] = Await.result(ff, scala.concurrent.duration.Duration.Inf)
+    Ok(org.nlp4l.ltr.support.views.html.newModel(ltrid,menubars,ltr,ltrmodels,features,"",""))
+  }
+
+  def modelStatus(ltrid: Int, mid: Int) = Action {
+    val ltr = getLtr(ltrid)
+    val menubars = buildMenubars(ltrid)
+    val f = ltrmodelDAO.fetchByLtrid(ltrid)
+    val ltrmodels: Seq[Ltrmodel] = Await.result(f, scala.concurrent.duration.Duration.Inf)
+    val ff = featureDAO.fetchByLtrid(ltrid)
+    val features: Seq[Feature] = Await.result(ff, scala.concurrent.duration.Duration.Inf)
+    Ok(org.nlp4l.ltr.support.views.html.modelStatus(ltrid,menubars,ltr,ltrmodels,features,"",""))
+  }
+
   private def buildMenubars(ltrid: Int): Seq[Menubar] = {
     if(ltrid <= 0) {
       Seq(Menubar("Config","/ltrdashboard/0/config"))

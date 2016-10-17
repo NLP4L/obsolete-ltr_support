@@ -85,7 +85,9 @@ class FeatureDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvide
     }
   }
 
-  
+  def fetchByLtrid(ltrid: Int): Future[Seq[Feature]] = {
+    db.run(features.filter(_.ltrid === ltrid).sortBy(_.fid.asc).result)
+  }
   
 
 }

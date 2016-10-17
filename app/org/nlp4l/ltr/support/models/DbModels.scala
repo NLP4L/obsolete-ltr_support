@@ -86,7 +86,7 @@ case class Ltrmodel (
     ltrid: Int,
     runid: Int,
     feature_list: String,
-    model_data: String,
+    model_data: Option[String],
     status: Int,
     progress: Int,
     started_at: Option[DateTime],
@@ -159,10 +159,12 @@ object DbModels {
     override def writes(d: Ltrmodel): JsValue =
       Json.obj(
         "mid" -> d.mid,
+        "ltrid" -> d.ltrid,
+        "runid" -> d.runid,
         "feature_list" -> d.feature_list,
-        "model_data" -> d.model_data.split(",").toList,
+        "model_data" -> d.model_data,
         "status" -> d.status,
-        "preogress" -> d.progress,
+        "progress" -> d.progress,
         "started_at" -> d.started_at.map { DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(_) },
         "finied_at" -> d.finished_at.map { DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(_) }
       )
