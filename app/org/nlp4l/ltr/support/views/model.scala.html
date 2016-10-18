@@ -1,5 +1,5 @@
 @import org.nlp4l.ltr.support.models._
-@(currentLtrid: Int, menubars: Seq[Menubar], ltr: Option[Ltrconfig], success: String, error: String)
+@(currentLtrid: Int, menubars: Seq[Menubar], ltr: Option[Ltrconfig], ltrmodels: Seq[Ltrmodel], success: String, error: String)
 @headerAddon = {
 
 }
@@ -29,31 +29,25 @@
           <p class="text-success">@success</p>
           <p class="text-danger">@error</p>
       </div>
-      <div class="col-md-6 text-right">
-          <button id="clear-button" type="button" class="btn btn-warning" data-toggle="modal" data-target="#clearModal" ><i class="glyphicon glyphicon-erase"></i> Clear</button>
-          Saved Date: 1234
-          <!-- Modal -->
-          <div class="modal fade" id="clearModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-body">
-                  <p>
-                    <strong>Are you sure to clear the annotationd data?</strong>
-                  </p>
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                  <button id="clear" type="button" class="btn btn-primary">OK</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
       </form>
     </div>
     <div class="row">
-      <div class="col-md-12 main">
-         MODEL TABLE // TODO
-      </div>
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <li><a href="/ltrdashboard/@currentLtrid/model/new">New <span class="sr-only"/></a></li>
+
+                @for(aLtrModel <- ltrmodels) {
+                <li><a href="/ltrdashboard/@currentLtrid/model/@aLtrModel.mid">#@aLtrModel.runid <span class="sr-only"/></a></li>
+                }
+
+            </ul>
+        </div>
+
+        <div class="col-sm-9 col-md-10 main">
+
+
+
+        </div>
     </div>
   </div>
 
