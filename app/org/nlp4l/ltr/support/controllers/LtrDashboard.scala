@@ -21,7 +21,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import play.api.mvc.Action
 import play.api.mvc.Controller
-import org.nlp4l.ltr.support.dao.FeatureDAO
+import org.nlp4l.ltr.support.dao.LtrfeatureDAO
 import org.nlp4l.ltr.support.dao.LtrconfigDAO
 import org.nlp4l.ltr.support.dao.LtrmodelDAO
 import org.nlp4l.ltr.support.dao.LtrannotationDAO
@@ -32,22 +32,25 @@ import scala.concurrent.Await
 import org.nlp4l.ltr.support.models.Menubar
 import scala.util.Failure
 import scala.util.Success
+import org.nlp4l.ltr.support.dao.FeatureProgressDAO
 
 @Singleton
 class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO, 
-                             featureDAO: FeatureDAO, 
+                             ltrfeatureDAO: LtrfeatureDAO, 
                              ltrconfigDAO: LtrconfigDAO,
                              ltrmodelDAO: LtrmodelDAO,
                              ltrqueryDAO: LtrqueryDAO,
-                             ltrannotationDAO: LtrannotationDAO) extends Controller {
+                             ltrannotationDAO: LtrannotationDAO,
+                             featureProgressDAO: FeatureProgressDAO) extends Controller {
 
   def index(ltrid: Int) = Action { request =>
     docFeatureDAO.init
-    featureDAO.init
+    ltrfeatureDAO.init
     ltrconfigDAO.init
     ltrmodelDAO.init
     ltrqueryDAO.init
     ltrannotationDAO.init
+    featureProgressDAO.init
     val menubars = buildMenubars(ltrid)
     Ok(org.nlp4l.ltr.support.views.html.dashboard(menubars))
   }

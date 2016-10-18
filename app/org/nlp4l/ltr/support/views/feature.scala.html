@@ -22,53 +22,60 @@
 
 @main(headerAddon)(menubars) {
 	
+  
   <div class="container-fluid">
     <div class="row">
-      <form id="featureform" data-toggle="validator" method="post">
-      <div class="col-md-6">
-          <button id="clear-button" type="button" class="btn btn-warning" data-toggle="modal" data-target="#clearModal" ><i class="glyphicon glyphicon-erase"></i> Clear</button>
-          <!-- Modal -->
-          <div class="modal fade" id="clearModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-body">
-                  <p>
-                    <strong>Are you sure to clear the annotationd data?</strong>
-                  </p>
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                  <button id="clear" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div class="col-sm-3 col-md-2 sidebar">
+        <p>Extraction Status (<span id="pv" style="color:#00b200">0</span>)%</p>
+        <span id="status"></span>
+        
       </div>
-      <div class="col-md-6 text-right">
-          <span id="status"></span>
-          <button id="extract-button" type="button" class="btn btn-primary" data-toggle="modal" data-target="#extractModal" ><i class="glyphicon glyphicon-play"></i> Extract</button>
-          <!-- Modal -->
-          <div class="modal fade" id="extractModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-body">
-                  <p>
-                    <strong>Are you sure to execute new extraction?</strong>
-                  </p>
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                  <button id="extract" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      </form>
-    </div>
-    <div class="row">
-      <div class="col-md-12 main">
-         EXTRACTION PROGRESS BAR
-         <p>
-           Progress:<progress value="0" id="p" max=100 style="width: 80%;"></progress>
-          (<span id="pv" style="color:#00b200">0</span>)%
+      
+      <div class="col-sm-9 col-md-10 main">
+        <div class="row">
+  	      <form id="featureform" data-toggle="validator" method="post">
+	      <div class="col-md-6">
+	          <button id="clear-button" type="button" class="btn btn-warning" data-toggle="modal" data-target="#clearModal" ><i class="glyphicon glyphicon-erase"></i> Clear</button>
+	          <!-- Modal -->
+	          <div class="modal fade" id="clearModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	            <div class="modal-dialog" role="document">
+	              <div class="modal-content">
+	                <div class="modal-body">
+	                  <p>
+	                    <strong>Are you sure to clear the annotationd data?</strong>
+	                  </p>
+	                  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+	                  <button id="clear" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+	                </div>
+	              </div>
+	            </div>
+	          </div>
+	      </div>
+	      <div class="col-md-6 text-right">
+	          
+	          <button id="extract-button" type="button" class="btn btn-primary" data-toggle="modal" data-target="#extractModal" ><i class="glyphicon glyphicon-play"></i> Extract</button>
+	          <!-- Modal -->
+	          <div class="modal fade" id="extractModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	            <div class="modal-dialog" role="document">
+	              <div class="modal-content">
+	                <div class="modal-body">
+	                  <p>
+	                    <strong>Are you sure to execute new extraction?</strong>
+	                  </p>
+	                  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+	                  <button id="extract" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+	                </div>
+	              </div>
+	            </div>
+	          </div>
+	        </div>
+	      </div>
+	      </form>
+	      
+	      <div class="row">
+	        <p>
+           <progress value="0" id="p" max=100 style="margin: 30px; height: 30px; width: 90%;-webkit-appearance: none; -moz-appearance: none; appearance: none;"></progress>
+          
          </p>
 <script>
 	var progressBar = document.getElementById('p');
@@ -81,15 +88,15 @@
 			if (newValue >= 100) {
 				progressBar.value = 100;
 				progressValue.innerHTML = 100;
-				progressStatus.innerHTML = "DONE";
+				progressStatus.innerHTML = "<h4><span class=\"label label-success\">DONE</span></h4>";
 				return;
 			}
 			progressBar.value = newValue;
 			progressValue.innerHTML = newValue;
 			if(newValue != 0) {
-				progressStatus.innerHTML = "RUNNING";
+				progressStatus.innerHTML = "<h4><span class=\"label label-warning\">RUNNING</span></h4>";
 		    } else {
-		    	progressStatus.innerHTML = "";
+		    	progressStatus.innerHTML = "<h4><span class=\"label label-danger\">NOT YET</span></h4>";
 		    }
 			setTimeout(function() {
 				updateProgress();
@@ -112,8 +119,12 @@
 </script>
          
          
+	      </div>
+	    </div>
+	 
+
          
-      </div>
+         
     </div>
   </div>
 

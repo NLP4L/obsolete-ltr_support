@@ -36,7 +36,7 @@ import org.nlp4l.ltr.support.actors.FeatureExtractClearResultMsg
 import org.nlp4l.ltr.support.actors.FeatureExtractGetProgressMsg
 import org.nlp4l.ltr.support.actors.FeatureExtractStartMsg
 import org.nlp4l.ltr.support.dao.DocFeatureDAO
-import org.nlp4l.ltr.support.dao.FeatureDAO
+import org.nlp4l.ltr.support.dao.LtrfeatureDAO
 import org.nlp4l.ltr.support.dao.LtrannotationDAO
 import org.nlp4l.ltr.support.dao.LtrconfigDAO
 import org.nlp4l.ltr.support.dao.LtrconfigDAO
@@ -70,13 +70,15 @@ import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.api.mvc.Action
 import play.api.mvc.Controller
 import org.nlp4l.ltr.support.models.FeatureExtractDTOs
+import org.nlp4l.ltr.support.dao.FeatureProgressDAO
 
 class LtrController @Inject()(docFeatureDAO: DocFeatureDAO, 
-                             featureDAO: FeatureDAO, 
+                             ltrfeatureDAO: LtrfeatureDAO, 
                              ltrconfigDAO: LtrconfigDAO,
                              ltrmodelDAO: LtrmodelDAO,
                              ltrqueryDAO: LtrqueryDAO,
-                             ltrannotationDAO: LtrannotationDAO ,
+                             ltrannotationDAO: LtrannotationDAO,
+                             featureProgressDAO: FeatureProgressDAO,
                              @Named("progress-actor") progressActor: ActorRef ) extends Controller {
 
 
@@ -347,7 +349,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
       val dto: FeatureExtractDTO = FeatureExtractDTO(q.qid.getOrElse(0), q.query, docs.map(_.docid).toList)
       dtos = dtos :+ dto
     }
-    val fedtos = FeatureExtractDTOs(ltr.ltrid.getOrElse(0), ltr.featureExtractUrl, ltr.featureProgressUrl, ltr.featureRetrieveUrl, dtos)
+    val fedtos = FeatureExtractDTOs(ltr.ltrid.getOrElse(0), ltr.featureExtractUrl, ltr.featureProgressUrl, ltr.featureRetrieveUrl, ltr.docUniqField, dtos)
     
     progressActor ! FeatureExtractStartMsg(fedtos)
     Ok(Json.toJson(ActionResult(true, Seq("started"))))

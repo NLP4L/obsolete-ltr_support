@@ -16,22 +16,13 @@
 
 package org.nlp4l.ltr.support.actors
 
+import org.nlp4l.ltr.support.models.FeatureExtractDTOs
+import org.nlp4l.ltr.support.procs.FeatureExtractor
 
 import akka.actor.Actor
-import akka.actor.Props
-import javax.inject.Inject
-import org.nlp4l.ltr.support.dao.LtrmodelDAO
-import org.nlp4l.ltr.support.dao.LtrconfigDAO
-import org.nlp4l.ltr.support.dao.DocFeatureDAO
-import org.nlp4l.ltr.support.dao.LtrannotationDAO
-import org.nlp4l.ltr.support.dao.LtrqueryDAO
-import org.nlp4l.ltr.support.dao.FeatureDAO
-import scala.util.Random
 import akka.actor.ActorRef
+import akka.actor.actorRef2Scala
 import play.api.Logger
-import org.nlp4l.ltr.support.procs.FeatureExtractor
-import org.nlp4l.ltr.support.models.Ltrconfig
-import org.nlp4l.ltr.support.models.FeatureExtractDTOs
 
 
 trait FeatureProgressReport {

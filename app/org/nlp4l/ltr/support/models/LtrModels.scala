@@ -40,20 +40,35 @@ case class FeatureExtractDTOs(
   featureExtractUrl: String,
   featureProgressUrl: String,
   featureRetrieveUrl: String,
+  idField: String,
   dtos: List[FeatureExtractDTO]
 )
 
-case class FeatureExtractResult (
-    fid: Int,
-    qid: Int,
-    docid: String,
-    value: Float
+case class FeatureExtractQueries(
+  idField: String,
+  queries: List[FeatureExtractDTO]
 )
 
+case class FeatureExtractParameter(
+  data: FeatureExtractQueries
+)
+
+case class FeatureExtractResultDoc (
+    feature: Seq[Float],
+    id: String
+)
+case class FeatureExtractResult (
+    qid: Int,
+    query: String,
+    docs: List[FeatureExtractResultDoc]
+)
+
+
+
+
 case class FeatureExtractResults (
-  procid: Int,
-  progress: Long,
-  results: List[FeatureExtractResult]
+  feature: Seq[String],
+  results: List[DocFeature]
 )
 
 object LtrModels {
@@ -72,36 +87,53 @@ object LtrModels {
         "queries" -> d.dtos)
   }
   
+  implicit val fWFeatureExtractQueriesWrites = new Writes[FeatureExtractQueries] {
+    override def writes(d: FeatureExtractQueries): JsValue =
+      Json.obj(
+        "idField" -> d.idField,
+        "queries" -> d.queries)
+  }
   
+  implicit val fWFeatureExtractParameterWrites = new Writes[FeatureExtractParameter] {
+    override def writes(d: FeatureExtractParameter): JsValue =
+      Json.obj(
+        "data" -> d.data)
+  }
+  
+  
+  implicit val fWFeatureExtractResultDocReads: Reads[FeatureExtractResultDoc] = (
+    (JsPath \ "feature").read[Seq[Float]] and
+    (JsPath \ "id").read[String])(FeatureExtractResultDoc.apply _)
 
   implicit val fWFeatureExtractResultReads: Reads[FeatureExtractResult] = (
-    (JsPath \ "fid").read[Int] and
     (JsPath \ "qid").read[Int] and
-    (JsPath \ "docid").read[String] and
-    (JsPath \ "value").read[Float])(FeatureExtractResult.apply _)
+    (JsPath \ "query").read[String] and
+    (JsPath \ "docs").read[List[FeatureExtractResultDoc]])(FeatureExtractResult.apply _)
   
-  implicit val fWFeatureExtractResultsReads: Reads[FeatureExtractResults] = (
-    (JsPath \ "progress").read[Int] and
-    (JsPath \ "procid").read[Long] and
-    (JsPath \ "results").read[List[FeatureExtractResult]])(FeatureExtractResults.apply _)
+//  implicit val fWFeatureExtractResultsReads: Reads[FeatureExtractResults] = (
+//    (JsPath \ "queries").read[List[FeatureExtractResult]])(FeatureExtractResults.apply _)
 
 
+  implicit val fWFeatureExtractResultDocWrites = new Writes[FeatureExtractResultDoc] {
+    override def writes(d: FeatureExtractResultDoc): JsValue =
+      Json.obj(
+        "id" -> d.id,
+        "feature" -> d.feature)
+  }
+  
   implicit val fWFeatureExtractResultWrites = new Writes[FeatureExtractResult] {
     override def writes(d: FeatureExtractResult): JsValue =
       Json.obj(
-        "fid" -> d.qid,
         "qid" -> d.qid,
-        "docid" -> d.docid,
-        "value" -> d.value)
+        "query" -> d.query,
+        "docs" -> d.docs)
   }
   
-  implicit val fWFeatureExtractResultsWrites = new Writes[FeatureExtractResults] {
-    override def writes(d: FeatureExtractResults): JsValue =
-      Json.obj(
-        "progress" -> d.progress,
-        "procid" -> d.procid,
-        "results" -> d.results)
-  }
+//  implicit val fWFeatureExtractResultsWrites = new Writes[FeatureExtractResults] {
+//    override def writes(d: FeatureExtractResults): JsValue =
+//      Json.obj(
+//        "queries" -> d.queries)
+//  }
 
 }
 

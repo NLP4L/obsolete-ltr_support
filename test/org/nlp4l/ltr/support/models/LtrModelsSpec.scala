@@ -18,18 +18,25 @@ class LtrModelsSpec extends Specification {
     val dto2 = FeatureExtractDTO(2, "ううう", List("えええ", "ううう"))
     
     val dtolist: List[FeatureExtractDTO] = List(dto1, dto2)
-    val dtos: FeatureExtractDTOs = FeatureExtractDTOs(1, "aaa", "bbb", "ccc", dtolist)
+    val dtos: FeatureExtractDTOs = FeatureExtractDTOs(1, "aaa", "bbb", "ccc", "id", dtolist)
+    val param: FeatureExtractParameter = FeatureExtractParameter( FeatureExtractQueries(dtos.idField, dtos.dtos ) )
     val expected1 = """{"qid":1,"query":"あああ","docs":["いいい","ううう"]}"""
     val expected2 = """{"queries":[{"qid":1,"query":"あああ","docs":["いいい","ううう"]},{"qid":2,"query":"ううう","docs":["えええ","ううう"]}]}"""
+    val expected3 = """data:{"idField":"id","queries":[{"qid":1,"query":"あああ","docs":["いいい","ううう"]},{"qid":2,"query":"ううう","docs":["えええ","ううう"]}]}}"""
     
     "fWFeatureExtractDTOWrites return a dto json" in {
       val result = Json.toJson(dto1).toString();
       result == expected1
     }
     
-    "fWFeatureExtractDTOsWrites return a json list of some dtos" in {
+    "fWFeatureExtractDTOsWrites return some dtos json" in {
       val result = Json.toJson(dtos).toString();
       result == expected2
+    }
+    
+    "fWFeatureExtractParameterWrites return a json" in {
+      val result = Json.toJson(param).toString();
+      result == expected3
     }
     
     

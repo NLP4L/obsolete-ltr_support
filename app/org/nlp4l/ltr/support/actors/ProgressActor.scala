@@ -25,50 +25,102 @@ import org.nlp4l.ltr.support.dao.LtrconfigDAO
 import org.nlp4l.ltr.support.dao.DocFeatureDAO
 import org.nlp4l.ltr.support.dao.LtrannotationDAO
 import org.nlp4l.ltr.support.dao.LtrqueryDAO
-import org.nlp4l.ltr.support.dao.FeatureDAO
+import org.nlp4l.ltr.support.dao.LtrfeatureDAO
 import java.util.Random
 import akka.actor.ActorRef
 import play.api.Logger
 import org.nlp4l.ltr.support.models.Ltrconfig
 import org.nlp4l.ltr.support.models.FeatureExtractDTOs
 import org.nlp4l.ltr.support.models.FeatureExtractResults
+import scala.concurrent.Await
+import org.nlp4l.ltr.support.models.FeatureProgress
+import org.nlp4l.ltr.support.dao.DocFeatureDAO
+import org.nlp4l.ltr.support.dao.DocFeatureDAO
+import scala.util.Failure
+import scala.util.Success
+import org.nlp4l.ltr.support.models.DocFeature
+import org.nlp4l.ltr.support.dao.FeatureProgressDAO
+import org.nlp4l.ltr.support.dao.LtrfeatureDAO
+import org.nlp4l.ltr.support.models.Ltrfeature
 
 
 
-class ProgressActor @Inject()(jdocFeatureDAO: DocFeatureDAO, 
-                             featureDAO: FeatureDAO, 
+class ProgressActor @Inject()(docFeatureDAO: DocFeatureDAO, 
+                             ltrfeatureDAO: LtrfeatureDAO, 
                              ltrconfigDAO: LtrconfigDAO,
                              ltrmodelDAO: LtrmodelDAO,
                              ltrqueryDAO: LtrqueryDAO,
-                             ltrannotationDAO: LtrannotationDAO) extends Actor {
+                             ltrannotationDAO: LtrannotationDAO,
+                             featureProgressDAO: FeatureProgressDAO) extends Actor {
   
   private val logger = Logger(this.getClass)
   
   override def receive: Receive = {
     case FeatureExtractStartMsg(dtos: FeatureExtractDTOs) => {
+      logger.info("FeatureExtractStartMsg received: " + dtos.ltrid)
+      logger.debug("FeatureExtractStartMsg received: " + dtos)
       context.actorOf(Props[FeatureActor]) ! FeatureExtractStartMsg(dtos)
     }
     case FeatureExtractSetProgressMsg(ltrid: Int, value: Int) => {
-      logger.info("FeatureExtractSetProgressMsg received: " + ltrid + " [" + value + "]")
-      // TODO DB store
-      // DEMO
-      FeatureProgressDB.set(ltrid, value)
+      logger.debug("FeatureExtractSetProgressMsg received: " + ltrid + " [" + value + "]")
+      
+      // FeatureProgressDB.set(ltrid, value) // for DEBUG
+      val delf = featureProgressDAO.deleteByLtrid(ltrid)
+      Await.result(delf, scala.concurrent.duration.Duration.Inf)
+      val insf = featureProgressDAO.insert(FeatureProgress(None, ltrid, value))
+      Await.result(insf, scala.concurrent.duration.Duration.Inf)
     }
     case FeatureExtractGetProgressMsg(ltrid: Int) => {
-      // TODO DB retrieve
-      // DEMO
-      val n = FeatureProgressDB.get(ltrid)
-      logger.info("FeatureExtractGetProgressMsg received: " + ltrid + " [" + n + "]")
-      sender ! n
+      // val n = FeatureProgressDB.get(ltrid) // for DEBUG
+      val f = featureProgressDAO.getByLtrid(ltrid)
+      Await.ready(f, scala.concurrent.duration.Duration.Inf)
+      f.value.get match {
+        case Success(featureProgress) => {
+          val n = featureProgress.progress
+          logger.debug("FeatureExtractGetProgressMsg received: " + ltrid + " [" + n + "]")
+          sender ! n
+        }
+        case Failure(ex) => {
+          val n = 0
+          logger.debug("FeatureExtractGetProgressMsg received: " + ltrid + " [" + n + "]")
+          sender ! n
+        }
+      }      
     }
     case FeatureExtractSetResultMsg(ltrid: Int, result: FeatureExtractResults) => {
-      logger.info("FeatureExtractSetProgressMsg received: " + ltrid + " [" + result + "]")
-      // TODO DB store
+      logger.info("FeatureExtractSetProgressMsg received: " + ltrid)
+      logger.debug("FeatureExtractSetProgressMsg received: "+ result)
+      
+      val fdelf = ltrfeatureDAO.deleteByLtrid(ltrid)
+      Await.result(fdelf, scala.concurrent.duration.Duration.Inf)
+      var fidmap: Map[Int, Int] = Map()
+      result.feature.zipWithIndex.foreach { case (fname,n) =>
+        val finsf = ltrfeatureDAO.insert(Ltrfeature(None, ltrid, fname))
+        val fins = Await.result(finsf, scala.concurrent.duration.Duration.Inf)
+        fins.fid map {fid =>
+          fidmap = fidmap + (n -> fid)
+        }
+      }
+      result.results map { docf =>
+        fidmap.get(docf.fid) map {fid =>
+          val f = docFeatureDAO.insert(DocFeature(None, fid, docf.qid, docf.docid, docf.value))
+          Await.result(f, scala.concurrent.duration.Duration.Inf)
+        }
+      }
+      
     }
     case FeatureExtractClearResultMsg(ltrid: Int) => {
-      // TODO DB retrieve
-      // DEMO
-      val n = FeatureProgressDB.set(ltrid, 0)
+      // val n = FeatureProgressDB.set(ltrid, 0) // for DEBUG
+      val qn = ltrqueryDAO.totalCountByLtrid(ltrid)
+      val qlist = ltrqueryDAO.fetchByLtrid(ltrid, "qid", "asc", 0, qn)
+      qlist map { q =>
+        q.qid map {qid =>
+          val delf = docFeatureDAO.deleteByQuid(qid)
+          Await.result(delf, scala.concurrent.duration.Duration.Inf)
+        }
+      }
+      val delf = featureProgressDAO.deleteByLtrid(ltrid)
+      Await.result(delf, scala.concurrent.duration.Duration.Inf)
     }
   }
 }

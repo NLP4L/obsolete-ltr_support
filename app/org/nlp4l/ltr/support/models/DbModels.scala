@@ -46,14 +46,22 @@ case class Ltrconfig (
 )
 
 /**
- * features Table
+ * ltrfeatures Table
  */
-case class Feature (
+case class Ltrfeature (
     fid: Option[Int],
-    name: String,
-    ltrid: Int
+    ltrid: Int,
+    name: String
 )
 
+/**
+ * featureprogress Table
+ */
+case class FeatureProgress (
+    id: Option[Int],
+    ltrid: Int,
+    progress: Int
+)
 
 /**
  * ltrqueries Table
@@ -126,12 +134,12 @@ object DbModels {
       )
   }
   
-  implicit val fWFeatureWrites = new Writes[Feature] {
-    override def writes(d: Feature): JsValue =
+  implicit val fWLtrfeatureWrites = new Writes[Ltrfeature] {
+    override def writes(d: Ltrfeature): JsValue =
       Json.obj(
         "fid" -> d.fid,
-        "name" -> d.name,
-        "ltrid" -> d.ltrid
+        "ltrid" -> d.ltrid,
+        "name" -> d.name
       )
   }
 

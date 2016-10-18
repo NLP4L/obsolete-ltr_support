@@ -70,7 +70,13 @@ class DocFeatureDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     db.run(query.update(DocFeature))
   }
 
-  def delete(qid: Int): Future[Int] = {
+  def delete(id: Int): Future[Int] = {
+    val query = docfeatures.filter(_.id === id)
+    val res = db.run(query.delete)
+    res
+  }
+  
+  def deleteByQuid(qid: Int): Future[Int] = {
     val query = docfeatures.filter(_.qid === qid)
     val res = db.run(query.delete)
     res
