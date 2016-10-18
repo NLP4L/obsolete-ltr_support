@@ -16,25 +16,28 @@
 
 package org.nlp4l.ltr.support.controllers
 
+import scala.concurrent.Await
+import scala.util.Failure
+import scala.util.Success
+
 import org.nlp4l.ltr.support.dao.DocFeatureDAO
+import org.nlp4l.ltr.support.dao.FeatureProgressDAO
+import org.nlp4l.ltr.support.dao.LtrannotationDAO
+import org.nlp4l.ltr.support.dao.LtrconfigDAO
+import org.nlp4l.ltr.support.dao.LtrfeatureDAO
+import org.nlp4l.ltr.support.dao.LtrmodelDAO
+import org.nlp4l.ltr.support.dao.LtrqueryDAO
+import org.nlp4l.ltr.support.models.Ltrconfig
+import org.nlp4l.ltr.support.models.Ltrfeature
+import org.nlp4l.ltr.support.models.Ltrmodel
+import org.nlp4l.ltr.support.models.Ltrquery
+import org.nlp4l.ltr.support.models.Menubar
+
 import javax.inject.Inject
 import javax.inject.Singleton
 import play.api.mvc.Action
 import play.api.mvc.Controller
-import org.nlp4l.ltr.support.dao.LtrfeatureDAO
-import org.nlp4l.ltr.support.dao.LtrconfigDAO
-import org.nlp4l.ltr.support.dao.LtrmodelDAO
-import org.nlp4l.ltr.support.dao.LtrannotationDAO
-import org.nlp4l.ltr.support.dao.LtrqueryDAO
-import org.nlp4l.ltr.support.models.Ltrconfig
-import org.nlp4l.ltr.support.models.Ltrquery
-import org.nlp4l.ltr.support.models.Ltrmodel
-import org.nlp4l.ltr.support.models.Feature
-import scala.concurrent.Await
-import org.nlp4l.ltr.support.models.Menubar
-import scala.util.Failure
-import scala.util.Success
-import org.nlp4l.ltr.support.dao.FeatureProgressDAO
+
 
 @Singleton
 class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO, 
@@ -131,8 +134,8 @@ class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO,
     val menubars = buildMenubars(ltrid)
     val f = ltrmodelDAO.fetchByLtrid(ltrid)
     val ltrmodels: Seq[Ltrmodel] = Await.result(f, scala.concurrent.duration.Duration.Inf)
-    val ff = featureDAO.fetchByLtrid(ltrid)
-    val features: Seq[Feature] = Await.result(ff, scala.concurrent.duration.Duration.Inf)
+    val ff = ltrfeatureDAO.fetchByLtrid(ltrid)
+    val features: Seq[Ltrfeature] = Await.result(ff, scala.concurrent.duration.Duration.Inf)
     Ok(org.nlp4l.ltr.support.views.html.newModel(ltrid,menubars,ltr,ltrmodels,features,"",""))
   }
 
@@ -141,8 +144,8 @@ class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO,
     val menubars = buildMenubars(ltrid)
     val f = ltrmodelDAO.fetchByLtrid(ltrid)
     val ltrmodels: Seq[Ltrmodel] = Await.result(f, scala.concurrent.duration.Duration.Inf)
-    val ff = featureDAO.fetchByLtrid(ltrid)
-    val features: Seq[Feature] = Await.result(ff, scala.concurrent.duration.Duration.Inf)
+    val ff = ltrfeatureDAO.fetchByLtrid(ltrid)
+    val features: Seq[Ltrfeature] = Await.result(ff, scala.concurrent.duration.Duration.Inf)
     Ok(org.nlp4l.ltr.support.views.html.modelStatus(ltrid,menubars,ltr,ltrmodels,features,"",""))
   }
 
