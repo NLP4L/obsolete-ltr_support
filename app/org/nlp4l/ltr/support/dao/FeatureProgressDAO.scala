@@ -40,7 +40,8 @@ class FeatureProgressDAO @Inject()(protected val dbConfigProvider: DatabaseConfi
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def ltrid = column[Int]("ltrid")
     def progress = column[Int]("progress")
-    def * = (id.?, ltrid, progress) <> (FeatureProgress.tupled, FeatureProgress.unapply)
+    def message = column[String]("message")
+    def * = (id.?, ltrid, progress, message) <> (FeatureProgress.tupled, FeatureProgress.unapply)
   }
 
   val featureprogress = TableQuery[FeatureProgressTable]

@@ -28,9 +28,9 @@ import play.api.Logger
 trait FeatureProgressReport {
   private val logger = Logger(this.getClass)
   
-  def report(ltrid: Int, to: ActorRef, progressValue: Int): Unit = {
+  def report(ltrid: Int, to: ActorRef, progressValue: Int, message: String): Unit = {
     logger.info("FeatureSetMsg received: " + ltrid + " [" + progressValue + "]")
-    to ! FeatureExtractSetProgressMsg(ltrid, progressValue)
+    to ! FeatureExtractSetProgressMsg(ltrid, progressValue, message)
   }
 
 }

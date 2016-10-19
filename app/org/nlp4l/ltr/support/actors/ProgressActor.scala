@@ -61,13 +61,13 @@ class ProgressActor @Inject()(docFeatureDAO: DocFeatureDAO,
       logger.debug("FeatureExtractStartMsg received: " + dtos)
       context.actorOf(Props[FeatureActor]) ! FeatureExtractStartMsg(dtos)
     }
-    case FeatureExtractSetProgressMsg(ltrid: Int, value: Int) => {
+    case FeatureExtractSetProgressMsg(ltrid: Int, value: Int, message: String) => {
       logger.debug("FeatureExtractSetProgressMsg received: " + ltrid + " [" + value + "]")
       
       // FeatureProgressDB.set(ltrid, value) // for DEBUG
       val delf = featureProgressDAO.deleteByLtrid(ltrid)
       Await.result(delf, scala.concurrent.duration.Duration.Inf)
-      val insf = featureProgressDAO.insert(FeatureProgress(None, ltrid, value))
+      val insf = featureProgressDAO.insert(FeatureProgress(None, ltrid, value, message))
       Await.result(insf, scala.concurrent.duration.Duration.Inf)
     }
     case FeatureExtractGetProgressMsg(ltrid: Int) => {
@@ -79,6 +79,23 @@ class ProgressActor @Inject()(docFeatureDAO: DocFeatureDAO,
           val n = featureProgress.progress
           logger.debug("FeatureExtractGetProgressMsg received: " + ltrid + " [" + n + "]")
           sender ! n
+        }
+        case Failure(ex) => {
+          val n = 0
+          logger.debug("FeatureExtractGetProgressMsg received: " + ltrid + " [" + n + "]")
+          sender ! n
+        }
+      }      
+    }
+    case FeatureExtractGetProgressMessageMsg(ltrid: Int) => {
+      // val n = FeatureProgressDB.getMessage(ltrid) // for DEBUG
+      val f = featureProgressDAO.getByLtrid(ltrid)
+      Await.ready(f, scala.concurrent.duration.Duration.Inf)
+      f.value.get match {
+        case Success(featureProgress) => {
+          val msg = featureProgress.message
+          logger.debug("FeatureExtractGetProgressMessageMsg received: " + ltrid + " [" + msg + "]")
+          sender ! msg
         }
         case Failure(ex) => {
           val n = 0
@@ -132,9 +149,11 @@ object ProgressActor {
 // Start a feature extraction
 case class FeatureExtractStartMsg(dtos: FeatureExtractDTOs)
 // Set a progress value of the feature extraction
-case class FeatureExtractSetProgressMsg(ltrid: Int, value: Int)
+case class FeatureExtractSetProgressMsg(ltrid: Int, value: Int, message: String)
 // Get a progress value of the feature extraction
 case class FeatureExtractGetProgressMsg(ltrid: Int)
+// Get a progress message of the feature extraction
+case class FeatureExtractGetProgressMessageMsg(ltrid: Int)
 // Set the result of the feature extraction
 case class FeatureExtractSetResultMsg(ltrid: Int, result: FeatureExtractResults)
 // Clear a result of the feature extraction
@@ -149,6 +168,9 @@ object FeatureProgressDB {
   }
   def get(ltrid: Int): Int = {
     p.getOrElse(ltrid, 0)
+  }
+  def getMessage(ltrid: Int): String = {
+    "Error Error Error"
   }
 }
 

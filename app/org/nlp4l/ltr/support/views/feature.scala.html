@@ -24,6 +24,7 @@
 	
   
   <div class="container-fluid">
+    
     <div class="row">
       <div class="col-sm-3 col-md-2 sidebar">
         <p>Extraction Status (<span id="pv" style="color:#00b200">0</span>)%</p>
@@ -51,8 +52,8 @@
 	            </div>
 	          </div>
 	      </div>
+	      
 	      <div class="col-md-6 text-right">
-	          
 	          <button id="extract-button" type="button" class="btn btn-primary" data-toggle="modal" data-target="#extractModal" ><i class="glyphicon glyphicon-play"></i> Extract</button>
 	          <!-- Modal -->
 	          <div class="modal fade" id="extractModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -75,12 +76,14 @@
 	      <div class="row">
 	        <p>
            <progress value="0" id="p" max=100 style="margin: 30px; height: 30px; width: 90%;-webkit-appearance: none; -moz-appearance: none; appearance: none;"></progress>
-          
-         </p>
+           </p>
+	       <p style="margin: 30px; width: 90%;" class="text-danger" id="errormsg">@error</p>
+
 <script>
 	var progressBar = document.getElementById('p');
 	var progressValue = document.getElementById('pv');
 	var progressStatus = document.getElementById('status');
+	var errorMsg = document.getElementById('errormsg');
 
 	function updateProgress() {
 		getProgressValue().done(function(result) {
@@ -89,18 +92,29 @@
 				progressBar.value = 100;
 				progressValue.innerHTML = 100;
 				progressStatus.innerHTML = "<h4><span class=\"label label-success\">DONE</span></h4>";
+				errorMsg.innerHTML = "";
 				return;
 			}
 			progressBar.value = newValue;
 			progressValue.innerHTML = newValue;
-			if(newValue != 0) {
+			if(newValue > 0) {
 				progressStatus.innerHTML = "<h4><span class=\"label label-warning\">RUNNING</span></h4>";
+				errorMsg.innerHTML = "";
+				setTimeout(function() {
+					updateProgress();
+				}, 1000);
+		    } else if(newValue == 0) {
+		    	progressStatus.innerHTML = "<h4><span class=\"label label-default\">NOT YET</span></h4>";
+		    	errorMsg.innerHTML = "";
+		    	setTimeout(function() {
+					updateProgress();
+				}, 1000);
 		    } else {
-		    	progressStatus.innerHTML = "<h4><span class=\"label label-danger\">NOT YET</span></h4>";
+		    	progressBar.value = 0;
+				progressValue.innerHTML = -1;
+		    	progressStatus.innerHTML = "<h4><span class=\"label label-danger\">ERROR</span></h4>";
+		    	getProgressMessage();
 		    }
-			setTimeout(function() {
-				updateProgress();
-			}, 1000);
 		}).fail(function(result) {
 			setTimeout(function() {
 				updateProgress();
@@ -113,7 +127,18 @@
 		return $.ajax({
 			type : 'GET',
 			url : '/ltr/feature/@currentLtrid/progress'
-		})
+		});
+	}
+	function getProgressMessage() {
+		var f = $.ajax({
+			type : 'GET',
+			url : '/ltr/feature/@currentLtrid/message'
+		});
+		f.done(function(result) {
+			errorMsg.innerHTML = result;
+		}).fail(function(result) {
+			errorMsg.innerHTML = "Error: Something wrong"
+		});
 	}
 	updateProgress();
 </script>

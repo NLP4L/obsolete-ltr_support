@@ -66,6 +66,7 @@ import play.api.mvc.Action
 import play.api.mvc.Controller
 import org.nlp4l.ltr.support.models.FeatureExtractDTOs
 import org.nlp4l.ltr.support.dao.FeatureProgressDAO
+import org.nlp4l.ltr.support.actors.FeatureExtractGetProgressMessageMsg
 
 class LtrController @Inject()(docFeatureDAO: DocFeatureDAO, 
                              ltrfeatureDAO: LtrfeatureDAO, 
@@ -355,6 +356,11 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     f.map(result => Ok(result.toString()))
   }
 
+  def getFeatureProgressMessage(ltrid: Int) = Action.async {
+    val f = pa ? FeatureExtractGetProgressMessageMsg(ltrid)
+    f.map(result => Ok(result.toString()))
+  }
+  
   def clearFeatureProgress(ltrid: Int) = Action {
     progressActor ! FeatureExtractClearResultMsg(ltrid)
     Ok(Json.toJson(ActionResult(true, Seq("cleared"))))

@@ -60,7 +60,8 @@ case class Ltrfeature (
 case class FeatureProgress (
     id: Option[Int],
     ltrid: Int,
-    progress: Int
+    progress: Int,
+    message: String
 )
 
 /**

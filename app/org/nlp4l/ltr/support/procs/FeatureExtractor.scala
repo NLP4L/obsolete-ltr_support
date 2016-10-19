@@ -76,7 +76,7 @@ class FeatureExtractor(sender: ActorRef) extends FeatureProgressReport {
           val p_res = Await.result(p_f, scala.concurrent.duration.Duration.Inf)
           val p_res_json: JsValue = Json.parse(p_res)
           progressV = (p_res_json \ "results" \ "progress").as[Int]
-          report(dtos.ltrid, sender, progressV)
+          report(dtos.ltrid, sender, progressV, "")
           Thread.sleep(1000)
         } while (progressV < 100)
           
@@ -91,6 +91,7 @@ class FeatureExtractor(sender: ActorRef) extends FeatureProgressReport {
       }
       
       case Failure(ex) => {
+        report(dtos.ltrid, sender, -1, ex.getMessage)
         logger.error(ex.getMessage, ex)
       }
     }

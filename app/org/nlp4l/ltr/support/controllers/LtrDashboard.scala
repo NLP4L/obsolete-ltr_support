@@ -159,7 +159,7 @@ class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO,
         case None => ""
       }
       Seq(
-          Menubar("Config"+ltrname,"/ltrdashboard/" + ltrid + "/config"),
+          Menubar("Config "+ltrname,"/ltrdashboard/" + ltrid + "/config"),
           Menubar("Query","/ltrdashboard/" + ltrid + "/query"),
           Menubar("Annotation","/ltrdashboard/" + ltrid + "/annotation"),
           Menubar("Feature","/ltrdashboard/" + ltrid + "/feature"),
