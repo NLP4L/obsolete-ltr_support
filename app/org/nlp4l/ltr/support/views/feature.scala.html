@@ -100,21 +100,18 @@
 			if(newValue > 0) {
 				progressStatus.innerHTML = "<h4><span class=\"label label-warning\">RUNNING</span></h4>";
 				errorMsg.innerHTML = "";
-				setTimeout(function() {
-					updateProgress();
-				}, 1000);
 		    } else if(newValue == 0) {
 		    	progressStatus.innerHTML = "<h4><span class=\"label label-default\">NOT YET</span></h4>";
 		    	errorMsg.innerHTML = "";
-		    	setTimeout(function() {
-					updateProgress();
-				}, 1000);
 		    } else {
 		    	progressBar.value = 0;
 				progressValue.innerHTML = -1;
 		    	progressStatus.innerHTML = "<h4><span class=\"label label-danger\">ERROR</span></h4>";
 		    	getProgressMessage();
 		    }
+			setTimeout(function() {
+				updateProgress();
+			}, 1000);
 		}).fail(function(result) {
 			setTimeout(function() {
 				updateProgress();
