@@ -94,7 +94,10 @@ class DocFeatureDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     }
   }
 
-  
-  
+  def fetchByFids(fids: Seq[Int]): Future[Seq[DocFeature]] = {
+    val query = docfeatures.filter(_.fid inSetBind fids)
+    val res = db.run(query.result)
+    res
+  }
 
 }

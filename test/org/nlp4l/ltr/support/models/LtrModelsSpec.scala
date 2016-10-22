@@ -39,7 +39,7 @@ class LtrModelsSpec extends Specification {
       result == expected3
     }
     
-    
+    /*
     val json3_1 = """{"fid":1,"qid":2,"docid":"あああ","value":12.3}"""
     val expected3_1 = FeatureExtractResult(1, 2, "あああ", 12.3f)
     val json3_2 = """{"fid":11,"qid":22,"docid":"いいい","value":112.3}"""
@@ -62,7 +62,7 @@ class LtrModelsSpec extends Specification {
       val result = Json.toJson(expected3_1).toString();
       result == json3_1
     }
-
+*/
   }
   
 }

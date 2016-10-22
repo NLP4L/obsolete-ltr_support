@@ -31,7 +31,6 @@ import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 import scala.util.Failure
 import scala.util.Success
-
 import org.nlp4l.ltr.support.actors.FeatureExtractClearResultMsg
 import org.nlp4l.ltr.support.actors.FeatureExtractGetProgressMsg
 import org.nlp4l.ltr.support.actors.FeatureExtractStartMsg
@@ -42,31 +41,26 @@ import org.nlp4l.ltr.support.dao.LtrconfigDAO
 import org.nlp4l.ltr.support.dao.LtrconfigDAO
 import org.nlp4l.ltr.support.dao.LtrmodelDAO
 import org.nlp4l.ltr.support.dao.LtrqueryDAO
-import org.nlp4l.ltr.support.models.ActionResult
-import org.nlp4l.ltr.support.models.FeatureExtractDTO
-import org.nlp4l.ltr.support.models.Ltrannotation
-import org.nlp4l.ltr.support.models.Ltrconfig
-import org.nlp4l.ltr.support.models.Ltrquery
-import org.nlp4l.ltr.support.models.Ltrmodel
+import org.nlp4l.ltr.support.models._
 import org.nlp4l.ltr.support.models.ViewModels._
 import org.nlp4l.ltr.support.models.DbModels._
 import org.nlp4l.ltr.support.models.LtrModels._
-
 import com.google.inject.name.Named
-
 import akka.actor.ActorRef
 import akka.pattern.AskableActorRef
 import akka.util.Timeout
 import javax.inject.Inject
+
+import org.joda.time.DateTime
 import play.api.libs.json.JsObject
 import play.api.libs.json.JsValue.jsValueToJsLookup
 import play.api.libs.json.Json
 import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.api.mvc.Action
 import play.api.mvc.Controller
-import org.nlp4l.ltr.support.models.FeatureExtractDTOs
 import org.nlp4l.ltr.support.dao.FeatureProgressDAO
 import org.nlp4l.ltr.support.actors.FeatureExtractGetProgressMessageMsg
+import org.nlp4l.ltr.support.procs.PRankTrainerFactory
 
 class LtrController @Inject()(docFeatureDAO: DocFeatureDAO, 
                              ltrfeatureDAO: LtrfeatureDAO, 
@@ -372,11 +366,58 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     val fr: Future[Int] = ltrmodelDAO.nextRunId(ltrid)
     val runid = Await.result(fr, scala.concurrent.duration.Duration.Inf)
     val feature_list = request.getQueryString("features").get
-    val newModel: Ltrmodel = Ltrmodel(None,ltrid,runid,feature_list,None,0,0,None,None)
-    val fm: Future[Ltrmodel] = ltrmodelDAO.insert(newModel)
-    val res = Await.result(fm, scala.concurrent.duration.Duration.Inf)
+    val ltrmodel: Ltrmodel = Ltrmodel(None,ltrid,runid,feature_list,None,0,0,Some(new DateTime()),None)
+    val fm: Future[Ltrmodel] = ltrmodelDAO.insert(ltrmodel)
+    val newModel = Await.result(fm, scala.concurrent.duration.Duration.Inf)
+
+    val ff = ltrfeatureDAO.fetchByLtrid(ltrid)
+    val featureList: Seq[Ltrfeature] = Await.result(ff, scala.concurrent.duration.Duration.Inf).sortBy(_.fid)
+    val selected: Array[Int] = feature_list.split(",").map(f => f.toInt)
+    val selectedFeatureList = featureList.filter(f => selected.contains(f.fid.get))
+
+    val xfeatures: Array[Vector[Float]] = Array(
+      Vector(1, 7), Vector(2, 7), Vector(3, 7), Vector(2, 8),
+      Vector(3, 4), Vector(5, 4), Vector(3, 5), Vector(4, 5), Vector(5, 5),
+      Vector(7, 2), Vector(7, 3), Vector(8, 3), Vector(7, 4), Vector(8, 4), Vector(8, 5),
+      Vector(10, 1), Vector(10, 2), Vector(11, 2), Vector(12, 2), Vector(11, 3), Vector(12, 3)
+    )
+    val ylabels = Array(
+      1, 1, 1, 1,
+      2, 2, 2, 2, 2,
+      3, 3, 3, 3, 3, 3,
+      4, 4, 4, 4, 4, 4
+    )
+    val fd = docFeatureDAO.fetchByFids(selected)
+    val docFeatures: Seq[DocFeature] = Await.result(fd, scala.concurrent.duration.Duration.Inf)
+
+    val fl = ltrannotationDAO.fetchAll() // TODO: filter
+    val ltrannotations = Await.result(fl, scala.concurrent.duration.Duration.Inf)
+
+    val anMap = ltrannotations.map(a => (a.qid, a.docid) -> a.label).toMap
+    val dfMap = docFeatures.map(a => (a.qid, a.docid, a.fid) -> a.value).toMap
+    val fkeys = docFeatures.map(a => (a.qid, a.docid)).distinct.sorted
+
+    val features: Array[Vector[Float]] = fkeys.map(fkey => {
+      selectedFeatureList.map(f => {
+        dfMap.getOrElse((fkey._1, fkey._2, f.fid.get), 0.0F)
+      }).toVector
+    }).toArray
+
+    val labels: Array[Int] = fkeys.map(fkey => {
+        anMap.getOrElse(((fkey._1, fkey._2)),0)
+    }).toArray
+
+    val featureNames = selectedFeatureList.map(_.name).toArray
+
+    // for now, we call it directly.
+    val factory = new PRankTrainerFactory(null)
+    val trainer = factory.getInstance()
+    val result = trainer.train(featureNames, features, labels, ltr.labelMax + 1)
+    val fu: Future[Int] = ltrmodelDAO.update(newModel.copy(model_data = Some(result), status =1, progress =1, finished_at = Some(new DateTime())))
+    Await.ready(fu, scala.concurrent.duration.Duration.Inf)
+
     val jsonResponse = Json.obj(
-      "mid" -> res.mid.get
+      "mid" -> newModel.mid.get
     )
     Ok(jsonResponse)
   }

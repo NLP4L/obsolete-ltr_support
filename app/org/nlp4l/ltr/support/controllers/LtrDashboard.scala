@@ -135,6 +135,7 @@ class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO,
     val f = ltrmodelDAO.fetchByLtrid(ltrid)
     val ltrmodels: Seq[Ltrmodel] = Await.result(f, scala.concurrent.duration.Duration.Inf)
     val ff = ltrfeatureDAO.fetchByLtrid(ltrid)
+
     val features: Seq[Ltrfeature] = Await.result(ff, scala.concurrent.duration.Duration.Inf)
     Ok(org.nlp4l.ltr.support.views.html.newModel(ltrid,menubars,ltr,ltrmodels,features,"",""))
   }
@@ -146,7 +147,9 @@ class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO,
     val ltrmodels: Seq[Ltrmodel] = Await.result(f, scala.concurrent.duration.Duration.Inf)
     val ff = ltrfeatureDAO.fetchByLtrid(ltrid)
     val features: Seq[Ltrfeature] = Await.result(ff, scala.concurrent.duration.Duration.Inf)
-    Ok(org.nlp4l.ltr.support.views.html.modelStatus(ltrid,menubars,ltr,ltrmodels,features,"",""))
+    val fm = ltrmodelDAO.get(mid)
+    val ltrmodel: Ltrmodel = Await.result(fm, scala.concurrent.duration.Duration.Inf)
+    Ok(org.nlp4l.ltr.support.views.html.modelStatus(ltrid,menubars,ltr,ltrmodels,features,ltrmodel,"",""))
   }
 
   private def buildMenubars(ltrid: Int): Seq[Menubar] = {
