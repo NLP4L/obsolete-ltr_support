@@ -329,9 +329,8 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     val ltr = Await.result(f, scala.concurrent.duration.Duration.Inf)
     
     val qCount = ltrqueryDAO.totalCountByLtrid(ltrid)
-    val qlistf = ltrqueryDAO.fetch("qid", "asc", 0, qCount)
-    val qlist = Await.result(qlistf, scala.concurrent.duration.Duration.Inf)
-    
+    val qlist = ltrqueryDAO.fetchByLtrid(ltrid, "qid", "asc", 0, qCount)
+
     var dtos: List[FeatureExtractDTO] = List()
     qlist.map { q =>
       val docsf = ltrannotationDAO.getByQid(q.qid.getOrElse(0))
