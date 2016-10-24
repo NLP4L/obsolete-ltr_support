@@ -1,5 +1,5 @@
 @import org.nlp4l.ltr.support.models._
-@(currentLtrid: Int, menubars: Seq[Menubar], ltr: Option[Ltrconfig], ltrmodels: Seq[Ltrmodel], features: Seq[Ltrfeature], ltrmodel: Ltrmodel, success: String, error: String)
+@(currentLtrid: Int, menubars: Seq[Menubar], ltr: Option[Ltrconfig], ltrmodels: Seq[Ltrmodel], features: Seq[(Ltrfeature, Boolean)], ltrmodel: Ltrmodel, success: String, error: String)
 @headerAddon = {
 <script src="@routes.Assets.versioned("javascripts/ltr/support/newmodel.js")" type="text/javascript"></script>
 }
@@ -69,7 +69,11 @@
 
             @for(aFeature <- features) {
             <div class="checkbox disabled">
-                <label><input type="checkbox" name="checkFeature" value="@aFeature.fid" disabled="">@aFeature.name</label>
+                @if(aFeature._2) {
+                <label><input type="checkbox" name="checkFeature" value="@aFeature._1.fid" disabled checked>@aFeature._1.name</label>
+                } else {
+                <label><input type="checkbox" name="checkFeature" value="@aFeature._1.fid" disabled>@aFeature._1.name</label>
+                }
             </div>
             }
 

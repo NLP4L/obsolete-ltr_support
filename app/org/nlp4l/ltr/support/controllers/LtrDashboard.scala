@@ -149,7 +149,9 @@ class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO,
     val features: Seq[Ltrfeature] = Await.result(ff, scala.concurrent.duration.Duration.Inf)
     val fm = ltrmodelDAO.get(mid)
     val ltrmodel: Ltrmodel = Await.result(fm, scala.concurrent.duration.Duration.Inf)
-    Ok(org.nlp4l.ltr.support.views.html.modelStatus(ltrid,menubars,ltr,ltrmodels,features,ltrmodel,"",""))
+    val selected: Array[Int] = ltrmodel.feature_list.split(",").map(f => f.toInt)
+    val featuresSelected = features.map(f => (f, selected.contains(f.fid.get)))
+    Ok(org.nlp4l.ltr.support.views.html.modelStatus(ltrid,menubars,ltr,ltrmodels,featuresSelected,ltrmodel,"",""))
   }
 
   private def buildMenubars(ltrid: Int): Seq[Menubar] = {
