@@ -362,8 +362,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
   def startModelCreation(ltrid: Int) = Action { request =>
     val f: Future[Ltrconfig] = ltrconfigDAO.get(ltrid)
     val ltr = Await.result(f, scala.concurrent.duration.Duration.Inf)
-    val fr: Future[Int] = ltrmodelDAO.nextRunId(ltrid)
-    val runid = Await.result(fr, scala.concurrent.duration.Duration.Inf)
+    val runid = ltrmodelDAO.nextRunId(ltrid)
     val feature_list = request.getQueryString("features").get
     val ltrmodel: Ltrmodel = Ltrmodel(None,ltrid,runid,feature_list,None,0,0,Some(new DateTime()),None)
     val fm: Future[Ltrmodel] = ltrmodelDAO.insert(ltrmodel)
@@ -374,18 +373,6 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     val selected: Array[Int] = feature_list.split(",").map(f => f.toInt)
     val selectedFeatureList = featureList.filter(f => selected.contains(f.fid.get))
 
-    val xfeatures: Array[Vector[Float]] = Array(
-      Vector(1, 7), Vector(2, 7), Vector(3, 7), Vector(2, 8),
-      Vector(3, 4), Vector(5, 4), Vector(3, 5), Vector(4, 5), Vector(5, 5),
-      Vector(7, 2), Vector(7, 3), Vector(8, 3), Vector(7, 4), Vector(8, 4), Vector(8, 5),
-      Vector(10, 1), Vector(10, 2), Vector(11, 2), Vector(12, 2), Vector(11, 3), Vector(12, 3)
-    )
-    val ylabels = Array(
-      1, 1, 1, 1,
-      2, 2, 2, 2, 2,
-      3, 3, 3, 3, 3, 3,
-      4, 4, 4, 4, 4, 4
-    )
     val fd = docFeatureDAO.fetchByFids(selected)
     val docFeatures: Seq[DocFeature] = Await.result(fd, scala.concurrent.duration.Duration.Inf)
 
@@ -403,7 +390,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     }).toArray
 
     val labels: Array[Int] = fkeys.map(fkey => {
-        anMap.getOrElse(((fkey._1, fkey._2)),0)
+        anMap.getOrElse((fkey._1, fkey._2),0)
     }).toArray
 
     val featureNames = selectedFeatureList.map(_.name).toArray

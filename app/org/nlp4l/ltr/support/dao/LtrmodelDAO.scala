@@ -19,17 +19,15 @@
  */
 package org.nlp4l.ltr.support.dao
 
-import scala.concurrent.Future
-
+import scala.concurrent.{Await, Future}
 import org.nlp4l.ltr.support.models.Ltrmodel
-
 import javax.inject.Inject
+
 import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.db.slick.HasDatabaseConfigProvider
 import slick.driver.JdbcProfile
 import slick.lifted.ProvenShape.proveShapeOf
-
 import com.github.tototoshi.slick.H2JodaSupport.datetimeTypeMapper
 import org.joda.time.DateTime
 
@@ -97,7 +95,9 @@ class LtrmodelDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
     db.run(ltrmodels.filter(_.ltrid === ltrid).sortBy(_.mid.asc).result)
   }
 
-  def nextRunId(ltrid: Int): Future[Int] = {
-    db.run(sql"select max(runid)+1 as n from ltrmodels".as[Int].head)
+  def nextRunId(ltrid: Int): Int = {
+    val f = db.run(sql"select max(runid)+1 as n from ltrmodels".as[Int].head)
+    val res = Await.result(f, scala.concurrent.duration.Duration.Inf)
+    if (res > 0) res else 1
   }
 }
