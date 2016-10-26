@@ -102,7 +102,11 @@ class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO,
       case Some(x) => Some(x)
       case _ => Some(Ltrquery(Some(0), "", ltrid, false))
     }
-    Ok(org.nlp4l.ltr.support.views.html.annotation(ltrid,menubars,ltr,ltrquery,"",""))
+    val totalf = ltrqueryDAO.totalCountByLtrid(ltrid)
+    val total = Await.result(totalf, scala.concurrent.duration.Duration.Inf)
+    val savedf = ltrqueryDAO.totalSavedCountByLtrid(ltrid)
+    val saved = Await.result(savedf, scala.concurrent.duration.Duration.Inf)
+    Ok(org.nlp4l.ltr.support.views.html.annotation(ltrid,menubars,ltr,ltrquery,(saved,total),"",""))
   }
 
   def editAnnotation(ltrid: Int, qid: Int) = Action {
@@ -114,7 +118,11 @@ class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO,
       case Success(x) => Some(x)
       case Failure(ex) => Some(Ltrquery(Some(0), "", ltrid, false))
     }
-    Ok(org.nlp4l.ltr.support.views.html.annotation(ltrid,menubars,ltr,ltrquery,"",""))
+    val totalf = ltrqueryDAO.totalCountByLtrid(ltrid)
+    val total = Await.result(totalf, scala.concurrent.duration.Duration.Inf)
+    val savedf = ltrqueryDAO.totalSavedCountByLtrid(ltrid)
+    val saved = Await.result(savedf, scala.concurrent.duration.Duration.Inf)
+    Ok(org.nlp4l.ltr.support.views.html.annotation(ltrid,menubars,ltr,ltrquery,(saved,total),"",""))
   }
 
   def feature(ltrid: Int) = Action {

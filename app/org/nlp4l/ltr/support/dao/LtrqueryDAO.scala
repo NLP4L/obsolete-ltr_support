@@ -116,6 +116,10 @@ class LtrqueryDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
     db.run(ltrqueries.filter(_.ltrid === ltrid).length.result)
   }
 
+  def totalSavedCountByLtrid(ltrid: Int): Future[Int] = {
+    db.run(ltrqueries.filter(_.ltrid === ltrid).filter(_.checked_flg === true).length.result)
+  }
+
   def fetchNext(ltrid: Int, qid: Int): Future[Option[Ltrquery]] = {
     val query = ltrqueries.filter(_.ltrid === ltrid).filter(_.qid > qid).filter(_.checked_flg === false).sortBy(_.qid.asc)
     db.run(query.result.headOption)
