@@ -42,28 +42,18 @@ class PRankTrainer extends Trainer  {
     logger.info("labels length: " + labels.length)
     val prank = new PRank(features, labels, featureNames.length, maxLabel, 10000)
     val wb = prank.train()
-    val weights = new StringBuilder
-    featureNames.zipWithIndex.foreach{ case(name,i)  => {
-      weights.append(s"""${(if (i!=0) ", " else "")}
-         |    {
-         |      name: "${name}",
-         |      weight: ${wb._1(i)}
-         |    }""".stripMargin)
-    }}
-    val bs = new StringBuilder
-    wb._2.zipWithIndex.foreach{ case(value,i)  => {
-      bs.append((if (i!=0) ", " else "") + value)
-    }}
-    val jsonText =
-      s"""
-      |model: {
-      |  name: "prank",
-      |  type: "prank",
-      |  weights: [${weights.result}
-      |  ],
-      |  bs: [${bs.result}]
-      |}
-      """.stripMargin
+    val jsonModel = Json.obj(
+        "name" -> "prank",
+        "type" -> "prank",
+        "weights" -> Json.toJson(wb._1),
+        "bs" -> Json.toJson(wb._2)
+//        "weights" -> Json.toJson(wb._1.map("%g".format(_))),
+//        "bs" -> Json.toJson(wb._2.map("%g".format(_)))
+    )
+    val jsonObj = Json.obj(
+      "model" -> jsonModel
+    )
+    val jsonText = Json.prettyPrint(jsonObj)
     logger.info("train end." + "\n" + jsonText)
     jsonText
   }
