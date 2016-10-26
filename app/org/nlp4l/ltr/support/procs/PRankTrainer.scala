@@ -71,15 +71,17 @@ class PRankTrainer extends Trainer  {
 
 class PRank(x: Array[Vector[Float]], y: Array[Int], featureNum: Int, maxLabel: Int, loopCount: Int) {
 
-  var w: Vector[Float] = Vector.fill(featureNum)(0)
-  val b = Array.fill(maxLabel)(0)
-  b.update(maxLabel - 1, Integer.MAX_VALUE)
+  var w: Vector[Float] = Vector.fill(featureNum)(0F)
+  val b: Array[Float] = Array.fill(maxLabel)(0F)
+  b.update(maxLabel - 1, Float.MaxValue)
   val yt = Array.fill(maxLabel - 1)(0)
   val tau = Array.fill(maxLabel - 1)(0)
+  val r = scala.util.Random
 
-  def train(): (Vector[Float], Vector[Int]) = {
+  def train(): (Vector[Float], Vector[Float]) = {
     for(t <- Range(1, loopCount)){
-      val t0 = t % x.size
+//      val t0 = t % x.size
+      val t0 = r.nextInt(x.size)
       val predictY = predict(0, weight(x(t0)))
       if(predictY != y(t0)){
         for(r <- Range(1, b.size)){

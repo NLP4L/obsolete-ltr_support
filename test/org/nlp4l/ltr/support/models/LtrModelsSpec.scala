@@ -18,7 +18,7 @@ class LtrModelsSpec extends Specification {
     val dto2 = FeatureExtractDTO(2, "ううう", List("えええ", "ううう"))
     
     val dtolist: List[FeatureExtractDTO] = List(dto1, dto2)
-    val dtos: FeatureExtractDTOs = FeatureExtractDTOs(1, "aaa", "bbb", "ccc", "id", dtolist)
+    val dtos: FeatureExtractDTOs = FeatureExtractDTOs(1, "aaa", "bbb", "ccc", dtolist)
     val param: FeatureExtractParameter = FeatureExtractParameter( FeatureExtractQueries(dtos.idField, dtos.dtos ) )
     val expected1 = """{"qid":1,"query":"あああ","docs":["いいい","ううう"]}"""
     val expected2 = """{"queries":[{"qid":1,"query":"あああ","docs":["いいい","ううう"]},{"qid":2,"query":"ううう","docs":["えええ","ううう"]}]}"""
