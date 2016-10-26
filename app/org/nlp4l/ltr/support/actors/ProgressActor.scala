@@ -120,7 +120,7 @@ class ProgressActor @Inject()(docFeatureDAO: DocFeatureDAO,
       }
       result.results map { docf =>
         fidmap.get(docf.fid) map {fid =>
-          val f = docFeatureDAO.insert(DocFeature(None, fid, docf.qid, docf.docid, docf.value))
+          val f = docFeatureDAO.insert(DocFeature(None, fid, docf.qid, docf.docid, docf.value, ltrid))
           Await.result(f, scala.concurrent.duration.Duration.Inf)
         }
       }
@@ -128,8 +128,10 @@ class ProgressActor @Inject()(docFeatureDAO: DocFeatureDAO,
     }
     case FeatureExtractClearResultMsg(ltrid: Int) => {
       // val n = FeatureProgressDB.set(ltrid, 0) // for DEBUG
-      val qn = ltrqueryDAO.totalCountByLtrid(ltrid)
-      val qlist = ltrqueryDAO.fetchByLtrid(ltrid, "qid", "asc", 0, qn)
+      val qnf = ltrqueryDAO.totalCountByLtrid(ltrid)
+      val qn = Await.result(qnf, scala.concurrent.duration.Duration.Inf)
+      val qlistf = ltrqueryDAO.fetchByLtrid(ltrid, "qid", "asc", 0, qn)
+      val qlist = Await.result(qlistf, scala.concurrent.duration.Duration.Inf)
       qlist map { q =>
         q.qid map {qid =>
           val delf = docFeatureDAO.deleteByQuid(qid)

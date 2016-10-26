@@ -37,14 +37,15 @@ class DocFeatureDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   private val logger = Logger(this.getClass)
   
-  class DocFeatureTable(tag: Tag) extends Table[DocFeature](tag, "docfeatures") {
-    def id = column[Option[Int]]("id", O.PrimaryKey, O.AutoInc)
-    def qid = column[Int]("qid")
-    def fid = column[Int]("fid")
-    def docid = column[String]("docid")
-    def value = column[Float]("value")
-    def * = (id, fid, qid, docid, value) <> (DocFeature.tupled, DocFeature.unapply)
-    def uk = index("uk_docfeatures", (qid, fid, docid), unique = true)
+  class DocFeatureTable(tag: Tag) extends Table[DocFeature](tag, "DOCFEATURES") {
+    def id = column[Option[Int]]("ID", O.PrimaryKey, O.AutoInc)
+    def qid = column[Int]("QID")
+    def fid = column[Int]("FID")
+    def docid = column[String]("DOCID")
+    def value = column[Float]("VALUE")
+    def ltrid = column[Int]("LTRID")
+    def * = (id, fid, qid, docid, value, ltrid) <> (DocFeature.tupled, DocFeature.unapply)
+    def uk = index("UK_DOCFEATURES", (qid, fid, docid), unique = true)
   }
 
   val docfeatures = TableQuery[DocFeatureTable]

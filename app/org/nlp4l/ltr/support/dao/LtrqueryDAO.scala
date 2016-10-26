@@ -36,11 +36,11 @@ class LtrqueryDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
 
   private val logger = Logger(this.getClass)
   
-  class LtrqueryTable(tag: Tag) extends Table[Ltrquery](tag, "ltrqueries") {
-    def qid = column[Int]("qid", O.PrimaryKey, O.AutoInc)
-    def query = column[String]("query")
-    def ltrid = column[Int]("ltrid")
-    def checked_flg = column[Boolean]("checked_flg")
+  class LtrqueryTable(tag: Tag) extends Table[Ltrquery](tag, "LTRQUERIES") {
+    def qid = column[Int]("QID", O.PrimaryKey, O.AutoInc)
+    def query = column[String]("QUERY")
+    def ltrid = column[Int]("LTRID")
+    def checked_flg = column[Boolean]("CHECKED_FLG")
     def * = (qid.?, query, ltrid, checked_flg) <> (Ltrquery.tupled, Ltrquery.unapply)
   }
 
@@ -85,8 +85,8 @@ class LtrqueryDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
     }
   }
 
-  def fetchByLtrid(ltrid: Int, sort: String = "qid", order: String= "asc", offset: Int = 0, size: Int = 10): Seq[Ltrquery] = {
-    val res = sort match {
+  def fetchByLtrid(ltrid: Int, sort: String = "qid", order: String= "asc", offset: Int = 0, size: Int = 10): Future[Seq[Ltrquery]] = {
+    sort match {
       case "query" =>
         order match {
           case "asc" =>
@@ -110,24 +110,26 @@ class LtrqueryDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
         }
       }
     }
-    Await.result(res, scala.concurrent.duration.Duration.Inf)
   }
 
-  def totalCountByLtrid(ltrid: Int): Int = {
-    val res = db.run(ltrqueries.filter(_.ltrid === ltrid).length.result)
-    Await.result(res, scala.concurrent.duration.Duration.Inf)
+  def totalCountByLtrid(ltrid: Int): Future[Int] = {
+    db.run(ltrqueries.filter(_.ltrid === ltrid).length.result)
   }
 
-  def fetchNext(ltrid: Int, qid: Int): Option[Ltrquery] = {
+  def fetchNext(ltrid: Int, qid: Int): Future[Option[Ltrquery]] = {
     val query = ltrqueries.filter(_.ltrid === ltrid).filter(_.qid > qid).filter(_.checked_flg === false).sortBy(_.qid.asc)
-    val res = db.run(query.result.headOption)
-    Await.result(res, scala.concurrent.duration.Duration.Inf)
+    db.run(query.result.headOption)
   }
 
-  def clearCheckedFlg(ltrid: Int): Unit = {
+  def clearCheckedFlg(ltrid: Int): Future[Int] = {
     val sql: String = s"update ltrqueries set checked_flg = false where ltrid = ${ltrid}"
-    val f: Future[Int] = db.run(sqlu"#$sql")
-    Await.ready(f, scala.concurrent.duration.Duration.Inf)
+    db.run(sqlu"#$sql")
   }
+
+  def deleteByLtrid(ltrid: Int): Future[Int] = {
+    val query = ltrqueries.filter(_.ltrid === ltrid)
+    db.run(query.delete)
+  }
+
 
 }

@@ -38,8 +38,7 @@ case class FeatureExtractDTO(
 case class FeatureExtractDTOs(
   ltrid: Int,
   featureExtractUrl: String,
-  featureProgressUrl: String,
-  featureRetrieveUrl: String,
+  featureExtractConfig: String,
   idField: String,
   dtos: List[FeatureExtractDTO]
 )

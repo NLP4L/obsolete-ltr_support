@@ -96,7 +96,9 @@ class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO,
   def annotation(ltrid: Int) = Action {
     val ltr = getLtr(ltrid)
     val menubars = buildMenubars(ltrid)
-    val ltrquery =ltrqueryDAO.fetchNext(ltrid, 0) match {
+    val f =ltrqueryDAO.fetchNext(ltrid, 0)
+    val res = Await.result(f, scala.concurrent.duration.Duration.Inf)
+    val ltrquery =res match {
       case Some(x) => Some(x)
       case _ => Some(Ltrquery(Some(0), "", ltrid, false))
     }

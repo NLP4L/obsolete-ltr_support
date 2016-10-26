@@ -44,21 +44,20 @@ class LtrconfigDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
 
   private val logger = Logger(this.getClass)
   
-  class LtrconfigTable(tag: Tag) extends Table[Ltrconfig](tag, "ltrconfigs") {
-    def ltrid = column[Int]("ltrid", O.PrimaryKey, O.AutoInc)
-    def name = column[String]("name")
-    def annotation_type = column[String]("annotation_type")
-    def model_factory_class_name = column[String]("model_factory_class_name")
-    def model_factory_class_settings = column[Option[String]]("model_factory_class_settings")
-    def search_url = column[String]("search_url")
-    def feature_extract_url = column[String]("feature_extract_url")
-    def feature_progress_url = column[String]("feature_progress_url")
-    def feature_retrieve_url = column[String]("feature_retrieve_url")
-    def doc_uniq_field = column[String]("doc_uniq_field")
-    def doc_title_field = column[String]("doc_title_field")
-    def doc_body_field = column[String]("doc_body_field")
-    def label_max = column[Int]("label_max")
-    def * = (ltrid.?, name, annotation_type, model_factory_class_name, model_factory_class_settings, search_url, feature_extract_url, feature_progress_url, feature_retrieve_url, doc_uniq_field, doc_title_field, doc_body_field, label_max) <> (Ltrconfig.tupled, Ltrconfig.unapply)
+  class LtrconfigTable(tag: Tag) extends Table[Ltrconfig](tag, "LTRCONFIGS") {
+    def ltrid = column[Int]("LTRID", O.PrimaryKey, O.AutoInc)
+    def name = column[String]("NAME")
+    def annotation_type = column[String]("ANNOTATION_TYPE")
+    def model_factory_class_name = column[String]("MODEL_FACTORY_CLASS_NAME")
+    def model_factory_class_settings = column[Option[String]]("MODEL_FACTORY_CLASS_SETTINGS")
+    def search_url = column[String]("SEARCH_URL")
+    def feature_extract_url = column[String]("FEATURE_EXTRACT_URL")
+    def feature_extract_config = column[String]("FEATURE_EXTRACT_CONFIG")
+    def doc_uniq_field = column[String]("DOC_UNIQ_FIELD")
+    def doc_title_field = column[String]("DOC_TITLE_FIELD")
+    def doc_body_field = column[String]("DOC_BODY_FIELD")
+    def label_max = column[Int]("LABEL_MAX")
+    def * = (ltrid.?, name, annotation_type, model_factory_class_name, model_factory_class_settings, search_url, feature_extract_url, feature_extract_config, doc_uniq_field, doc_title_field, doc_body_field, label_max) <> (Ltrconfig.tupled, Ltrconfig.unapply)
   }
 
   val ltrconfigs = TableQuery[LtrconfigTable]

@@ -48,13 +48,12 @@ $ ->
     modelFactryClassName = $('#modelFactryClassName').val()
     searchUrl = $('#searchUrl').val()
     featureExtractUrl = $('#featureExtractUrl').val()
-    featureProgressUrl = $('#featureProgressUrl').val()
-    featureRetrieveUrl = $('#featureRetrieveUrl').val()
+    featureExtractConfig = $('#featureExtractConfig').val()
     docUniqField = $('#docUniqField').val()
     docTitleField = $('#docTitleField').val()
     docBodyField = $('#docBodyField').val()
 
-    if (name.length > 0 && annotationType.length > 0 && labelMax.length > 0 && modelFactryClassName.length > 0 && searchUrl.length > 0 && featureExtractUrl.length > 0 && featureProgressUrl.length > 0 && featureRetrieveUrl.length > 0 && docUniqField.length > 0 && docTitleField.length > 0&& docBodyField.length > 0)
+    if (name.length > 0 && annotationType.length > 0 && labelMax.length > 0 && modelFactryClassName.length > 0 && searchUrl.length > 0 && featureExtractUrl.length > 0 && featureExtractConfig.length > 0 && docUniqField.length > 0 && docTitleField.length > 0&& docBodyField.length > 0)
       $('#save-button').prop('disabled', false)
     else
       $('#save-button').prop('disabled', true)
@@ -95,8 +94,7 @@ $ ->
     modelFactoryClassSettings = $('#modelFactoryClassSettings').val()
     searchUrl = $('#searchUrl').val()
     featureExtractUrl = $('#featureExtractUrl').val()
-    featureProgressUrl = $('#featureProgressUrl').val()
-    featureRetrieveUrl = $('#featureRetrieveUrl').val()
+    featureExtractConfig = $('#featureExtractConfig').val()
     docUniqField = $('#docUniqField').val()
     docTitleField = $('#docTitleField').val()
     docBodyField = $('#docBodyField').val()
@@ -112,8 +110,7 @@ $ ->
       	"modelFactoryClassSettings":modelFactoryClassSettings,
       	"searchUrl":searchUrl,
       	"featureExtractUrl":featureExtractUrl,
-      	"featureProgressUrl":featureProgressUrl,
-      	"featureRetrieveUrl":featureRetrieveUrl,
+      	"featureExtractConfig":featureExtractConfig,
       	"docUniqField":docUniqField,
       	"docTitleField":docTitleField,
       	"docBodyField":docBodyField

@@ -82,7 +82,7 @@
           			<label class="col-sm-2 control-label" for="annotationType">Annotation Type</label>
           			<div class="col-sm-10">
           				<select class="form-control" id="annotationType" required >
-          					<option value="pointwise"鬩搾ｽｵ�ｿｽ�ｽｽ�ｽｲ�ｿｽ�ｽｿ�ｽｽ�ｿｽ�ｽｽ�ｽｿ�ｿｽ�ｽｽ�ｽｽ@if(ltr.map(d => d.annotationType).getOrElse("") == "pointwise") { selected }>pointwise</option>
+          					<option value="pointwise" @if(ltr.map(d => d.annotationType).getOrElse("") == "pointwise") { selected }>pointwise</option>
           				</select>
           			</div>
           		</div>
@@ -103,9 +103,9 @@
           	</div><!-- row -->
           	<div class="row">
           		<div class="form-group">
-          			<label class="col-sm-2 control-label" for="modelFactryClassName">Model Factory Class</label>
+          			<label class="col-sm-2 control-label" for="modelFactryClassName">Trainer Factory Class</label>
           			<div class="col-sm-10">
-          				<input type="text" class="form-control" id="modelFactryClassName" value="@ltr.map(d => d.modelFactryClassName).getOrElse("")" required />
+          				<input type="text" class="form-control" id="modelFactryClassName" value="@ltr.map(d => d.modelFactryClassName).getOrElse("org.nlp4l.ltr.support.procs.PRankTrainerFactory")" required />
           			</div>
           		</div>
           	</div><!-- row -->
@@ -113,7 +113,7 @@
           		<div class="form-group">
           			<label class="col-sm-2 control-label" for="modelFactoryClassSettings">- settings</label>
           			<div class="col-sm-10">
-          				<input type="text" class="form-control" id="modelFactoryClassSettings" value="@ltr.map(d => d.modelFactoryClassSettings).getOrElse("")" />
+          				<textarea class="form-control" id="modelFactoryClassSettings" rows="1" />@ltr.map(d => d.modelFactoryClassSettings).getOrElse("")</textarea>
           			</div>
           		</div>
           	</div><!-- row -->
@@ -129,23 +129,15 @@
           		<div class="form-group">
           			<label class="col-sm-2 control-label" for="featureExtractUrl">Feature Extract URL</label>
           			<div class="col-sm-10">
-          				<input type="text" class="form-control" id="featureExtractUrl" value="@ltr.map(d => d.featureExtractUrl).getOrElse("http://localhost:8983/solr/collection1/features?command=extract&conf=ltr_features.conf&wt=json")" required />
+          				<input type="text" class="form-control" id="featureExtractUrl" value="@ltr.map(d => d.featureExtractUrl).getOrElse("http://localhost:8983/solr/collection1/features")" required />
           			</div>
           		</div>
           	</div><!-- row -->
           	<div class="row">
           		<div class="form-group">
-          			<label class="col-sm-2 control-label" for="featureProgressUrl">Feature Progress URL</label>
+          			<label class="col-sm-2 control-label" for="featureExtractConfig">Feature Extract Config</label>
           			<div class="col-sm-10">
-          				<input type="text" class="form-control" id="featureProgressUrl" value="@ltr.map(d => d.featureProgressUrl).getOrElse("http://localhost:8983/solr/collection1/features?command=progress&procId=${procId}&wt=json")" required />
-          			</div>
-          		</div>
-          	</div><!-- row -->
-          	<div class="row">
-          		<div class="form-group">
-          			<label class="col-sm-2 control-label" for="featureRetrieveUrl">Feature Retrieve URL</label>
-          			<div class="col-sm-10">
-          				<input type="text" class="form-control" id="featureRetrieveUrl" value="@ltr.map(d => d.featureRetrieveUrl).getOrElse("http://localhost:8983/solr/collection1/features?command=download&procId=${procId}&wt=json")" required />
+          				<input type="text" class="form-control" id="featureExtractConfig" value="@ltr.map(d => d.featureExtractConfig).getOrElse("ltr_features.conf")" required />
           			</div>
           		</div>
           	</div><!-- row -->

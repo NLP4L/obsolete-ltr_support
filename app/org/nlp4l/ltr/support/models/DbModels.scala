@@ -37,8 +37,7 @@ case class Ltrconfig (
     modelFactoryClassSettings: Option[String],
     searchUrl: String,
     featureExtractUrl: String,
-    featureProgressUrl: String,
-    featureRetrieveUrl: String,
+    featureExtractConfig: String,
     docUniqField: String,
     docTitleField: String,
     docBodyField: String,
@@ -82,7 +81,8 @@ case class DocFeature (
     fid: Int,
     qid: Int,
     docid: String,
-    value: Float
+    value: Float,
+    ltrid: Int
 )
 
 
@@ -98,6 +98,7 @@ case class Ltrmodel (
     model_data: Option[String],
     status: Int,
     progress: Int,
+    mesage: String,
     started_at: Option[DateTime],
     finished_at: Option[DateTime]
 )
@@ -109,7 +110,8 @@ case class Ltrmodel (
 case class Ltrannotation (
     qid: Int,
     docid: String,
-    label: Int
+    label: Int,
+    ltrid: Int
 )
 
 
@@ -126,8 +128,7 @@ object DbModels {
         "modelFactoryClassSettings" -> d.modelFactoryClassSettings,
         "searchUrl" -> d.searchUrl,
         "featureExtractUrl" -> d.featureExtractUrl,
-        "featureProgressUrl" -> d.featureProgressUrl,
-        "featureRetrieveUrl" -> d.featureRetrieveUrl,
+        "featureExtractUrl" -> d.featureExtractConfig,
         "docUniqField" -> d.docUniqField,
         "docTitleField" -> d.docTitleField,
         "docBodyField" -> d.docBodyField,
@@ -160,7 +161,8 @@ object DbModels {
         "qid" -> d.qid,
         "docid" -> d.docid,
         "qid" -> d.qid,
-        "value" -> d.value
+        "value" -> d.value,
+        "ltrid" -> d.ltrid
       )
   } 
   

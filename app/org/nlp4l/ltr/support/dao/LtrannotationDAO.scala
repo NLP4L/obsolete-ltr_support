@@ -39,12 +39,13 @@ class LtrannotationDAO @Inject()(protected val dbConfigProvider: DatabaseConfigP
 
   private val logger = Logger(this.getClass)
   
-  class LtrannotationTable(tag: Tag) extends Table[Ltrannotation](tag, "ltrannotations") {
-    def qid = column[Int]("qid")
-    def docid = column[String]("docid")
-    def label = column[Int]("label")
-    def * = (qid, docid, label) <> (Ltrannotation.tupled, Ltrannotation.unapply)
-    def pk = primaryKey("pk_ltrannotations", (qid, docid))
+  class LtrannotationTable(tag: Tag) extends Table[Ltrannotation](tag, "LTRANNOTATIONS") {
+    def qid = column[Int]("QID")
+    def docid = column[String]("DOCID")
+    def label = column[Int]("LABEL")
+    def ltrid = column[Int]("LTRID")
+    def * = (qid, docid, label, ltrid) <> (Ltrannotation.tupled, Ltrannotation.unapply)
+    def pk = primaryKey("PK_LTRANNOTATIONS", (qid, docid))
   }
 
   val ltrannotations = TableQuery[LtrannotationTable]
@@ -75,9 +76,14 @@ class LtrannotationDAO @Inject()(protected val dbConfigProvider: DatabaseConfigP
     Await.result(db.run(query), scala.concurrent.duration.Duration.Inf)
   }
 
-  def deleteByQid(qid: Int): Unit = {
+  def deleteByQid(qid: Int): Future[Int] = {
     val query = ltrannotations.filter(_.qid === qid)
-    Await.result(db.run(query.delete), scala.concurrent.duration.Duration.Inf)
+    db.run(query.delete)
+  }
+
+  def deleteByLtrid(ltrid: Int): Future[Int] = {
+    val query = ltrannotations.filter(_.ltrid === ltrid)
+    db.run(query.delete)
   }
 
   def update(Ltrannotation: Ltrannotation): Future[Int] = {
@@ -103,4 +109,7 @@ class LtrannotationDAO @Inject()(protected val dbConfigProvider: DatabaseConfigP
     }
   }
 
+  def fetchByLtrid(ltrid: Int): Future[Seq[Ltrannotation]] = {
+    db.run(ltrannotations.filter(_.ltrid === ltrid).result)
+  }
 }

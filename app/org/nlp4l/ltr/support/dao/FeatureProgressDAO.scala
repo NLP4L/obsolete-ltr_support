@@ -36,11 +36,11 @@ class FeatureProgressDAO @Inject()(protected val dbConfigProvider: DatabaseConfi
 
   private val logger = Logger(this.getClass)
   
-  class FeatureProgressTable(tag: Tag) extends Table[FeatureProgress](tag, "featureprogress") {
-    def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
-    def ltrid = column[Int]("ltrid")
-    def progress = column[Int]("progress")
-    def message = column[String]("message")
+  class FeatureProgressTable(tag: Tag) extends Table[FeatureProgress](tag, "FEATUREPROGRESS") {
+    def id = column[Int]("ID", O.PrimaryKey, O.AutoInc)
+    def ltrid = column[Int]("LTRID")
+    def progress = column[Int]("PROGRESS")
+    def message = column[String]("MESSAGE")
     def * = (id.?, ltrid, progress, message) <> (FeatureProgress.tupled, FeatureProgress.unapply)
   }
 

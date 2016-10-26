@@ -55,7 +55,8 @@ class FeatureExtractor(sender: ActorRef) extends FeatureProgressReport {
   def execute(dtos: FeatureExtractDTOs) = {  
     // Post the annotated docs and queries
     val param = FeatureExtractParameter( FeatureExtractQueries(dtos.idField, dtos.dtos ) )
-    val s_req = url(dtos.featureExtractUrl).POST
+    val extractUrl = dtos.featureExtractUrl + s"?command=extract&conf=${dtos.featureExtractConfig}&wt=json"
+    val s_req = url(extractUrl).POST
           .setBody(Json.toJson(param).toString())
           .setHeader("Accept", "application/json")
           .setHeader("Content-Type", "application/json; charset=utf-8")
@@ -67,7 +68,8 @@ class FeatureExtractor(sender: ActorRef) extends FeatureProgressReport {
         // Progress
         val s_res_json: JsValue = Json.parse(s_res)
         val procid = (s_res_json \ "results" \ "procId").as[Long]
-        val progressUrl = dtos.featureProgressUrl.replaceAll("\\$\\{procId\\}", procid.toString)
+        val progressUrl = dtos.featureExtractUrl + s"?command=progress&procId=${procid.toString}&wt=json"
+
         val p_req = url(progressUrl)
         
         var progressV: Int = 0
@@ -81,11 +83,11 @@ class FeatureExtractor(sender: ActorRef) extends FeatureProgressReport {
         } while (progressV < 100)
           
         // Save
-        val retrieveUrl = dtos.featureRetrieveUrl.replaceAll("\\$\\{procId\\}", procid.toString)
+        val retrieveUrl = dtos.featureExtractUrl + s"?command=download&procId=${procid.toString}&wt=json"
         val r_req = url(retrieveUrl)
         val r_f = Http(r_req OK as.String)
         val r_res = Await.result(r_f, scala.concurrent.duration.Duration.Inf)
-        val r_result: FeatureExtractResults = parseResults(Json.parse(r_res))
+        val r_result: FeatureExtractResults = parseResults(Json.parse(r_res), dtos.ltrid)
         sender ! FeatureExtractSetResultMsg(dtos.ltrid, r_result)
     
       }
@@ -99,7 +101,7 @@ class FeatureExtractor(sender: ActorRef) extends FeatureProgressReport {
   
   
   
-  def parseResults(json: JsValue) : FeatureExtractResults = {
+  def parseResults(json: JsValue, ltrid: Int) : FeatureExtractResults = {
     val fnamelist = (json \ "results" \ "result" \ "data" \ "feature").as[Seq[String]]
     val queries =  (json \ "results" \ "result" \ "data" \ "queries").as[List[FeatureExtractResult]]
     var results: List[DocFeature] = List()
@@ -107,7 +109,7 @@ class FeatureExtractor(sender: ActorRef) extends FeatureProgressReport {
     queries map {q =>
       q.docs map {d =>
         fnamelist.zipWithIndex.foreach { case (fid,n) =>
-          results = results :+ DocFeature(None, n, q.qid, d.id, d.feature(n))
+          results = results :+ DocFeature(None, n, q.qid, d.id, d.feature(n), ltrid)
         }
       }
     }

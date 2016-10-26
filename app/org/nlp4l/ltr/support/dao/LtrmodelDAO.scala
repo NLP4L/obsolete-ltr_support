@@ -37,17 +37,18 @@ class LtrmodelDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
 
   private val logger = Logger(this.getClass)
   
-  class LtrmodelTable(tag: Tag) extends Table[Ltrmodel](tag, "ltrmodels") {
-    def mid = column[Int]("mid", O.PrimaryKey, O.AutoInc)
-    def ltrid = column[Int]("ltrid")
-    def runid = column[Int]("runid")
-    def feature_list = column[String]("feature_list")
-    def model_data = column[Option[String]]("model_data")
-    def status = column[Int]("status")
-    def progress = column[Int]("progress")
-    def started_at = column[Option[DateTime]]("started_at")
-    def finished_at = column[Option[DateTime]]("finished_at")
-    def * = (mid.?, ltrid, runid, feature_list, model_data, status, progress, started_at, finished_at) <> (Ltrmodel.tupled, Ltrmodel.unapply)
+  class LtrmodelTable(tag: Tag) extends Table[Ltrmodel](tag, "LTRMODELS") {
+    def mid = column[Int]("MID", O.PrimaryKey, O.AutoInc)
+    def ltrid = column[Int]("LTRID")
+    def runid = column[Int]("RUNID")
+    def feature_list = column[String]("FEATURE_LIST")
+    def model_data = column[Option[String]]("MODEL_DATA")
+    def status = column[Int]("STATUS")
+    def progress = column[Int]("PROGRESS")
+    def message = column[String]("MESSAGE")
+    def started_at = column[Option[DateTime]]("STARTED_AT")
+    def finished_at = column[Option[DateTime]]("FINISHED_AT")
+    def * = (mid.?, ltrid, runid, feature_list, model_data, status, progress, message, started_at, finished_at) <> (Ltrmodel.tupled, Ltrmodel.unapply)
   }
 
   val ltrmodels = TableQuery[LtrmodelTable]

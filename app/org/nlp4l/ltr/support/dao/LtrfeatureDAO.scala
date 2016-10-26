@@ -37,10 +37,10 @@ class LtrfeatureDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   private val logger = Logger(this.getClass)
   
-  class LtrfeatureTable(tag: Tag) extends Table[Ltrfeature](tag, "ltrfeature") {
-    def fid = column[Int]("fid", O.PrimaryKey, O.AutoInc)
-    def ltrid = column[Int]("ltrid")
-    def name = column[String]("name")
+  class LtrfeatureTable(tag: Tag) extends Table[Ltrfeature](tag, "LTRFEATURE") {
+    def fid = column[Int]("FID", O.PrimaryKey, O.AutoInc)
+    def ltrid = column[Int]("LTRID")
+    def name = column[String]("NAME")
     def * = (fid.?, ltrid, name) <> (Ltrfeature.tupled, Ltrfeature.unapply)
   }
 

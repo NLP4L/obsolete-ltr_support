@@ -83,8 +83,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     val modelFactoryClassSettings = (data \ "modelFactoryClassSettings").as[String]
     val searchUrl = (data \ "searchUrl").as[String]
     val featureExtractUrl = (data \ "featureExtractUrl").as[String]
-    val featureProgressUrl = (data \ "featureProgressUrl").as[String]
-    val featureRetrieveUrl = (data \ "featureRetrieveUrl").as[String]
+    val featureExtractConfig = (data \ "featureExtractConfig").as[String]
     val docUniqField = (data \ "docUniqField").as[String]
     val docTitleField = (data \ "docTitleField").as[String]
     val docBodyField = (data \ "docBodyField").as[String]
@@ -93,7 +92,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     if (name.isEmpty) {
       Future.successful(BadRequest("Name cannot be empty."))
     } else {
-      val newLtr: Ltrconfig = Ltrconfig(Some(ltrid), name, annotationType, modelFactryClassName, Some(modelFactoryClassSettings), searchUrl, featureExtractUrl, featureProgressUrl, featureRetrieveUrl, docUniqField, docTitleField, docBodyField, labelMax.toInt)
+      val newLtr: Ltrconfig = Ltrconfig(Some(ltrid), name, annotationType, modelFactryClassName, Some(modelFactoryClassSettings), searchUrl, featureExtractUrl, featureExtractConfig, docUniqField, docTitleField, docBodyField, labelMax.toInt)
       val f: Future[Ltrconfig] = ltrconfigDAO.get(ltrid)
       Await.ready(f, scala.concurrent.duration.Duration.Inf)
       f.value.get match {
@@ -123,13 +122,12 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
   }
 
   def deleteLtrConfig(ltrid: Int) = Action.async {
-    ltrqueryDAO.clearCheckedFlg(ltrid)
-    val queryList = ltrqueryDAO.fetchByLtrid(ltrid, "qid", "asc", 0, Integer.MAX_VALUE)
-    queryList.foreach(q => {
-      ltrannotationDAO.deleteByQid(q.qid.get)
-      val f: Future[Int] = ltrqueryDAO.delete(q.qid.get)
-      Await.ready(f, scala.concurrent.duration.Duration.Inf)
-    })
+    val clearf = ltrqueryDAO.clearCheckedFlg(ltrid)
+    Await.ready(clearf, scala.concurrent.duration.Duration.Inf)
+    val delaf = ltrannotationDAO.deleteByLtrid(ltrid)
+    Await.ready(delaf, scala.concurrent.duration.Duration.Inf)
+    val delqf = ltrqueryDAO.deleteByLtrid(ltrid)
+    Await.ready(delqf, scala.concurrent.duration.Duration.Inf)
     val f: Future[Ltrconfig] = ltrconfigDAO.get(ltrid)
     val ltr = Await.result(f, scala.concurrent.duration.Duration.Inf)
     ltrconfigDAO.delete(ltrid) map {
@@ -161,16 +159,16 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
   }
 
   def clearAllAnnotation(ltrid: Int) = Action { request =>
-    ltrqueryDAO.clearCheckedFlg(ltrid)
-    val queryList = ltrqueryDAO.fetchByLtrid(ltrid, "qid", "asc", 0, Integer.MAX_VALUE)
-    queryList.foreach(q => {
-      ltrannotationDAO.deleteByQid(q.qid.get)
-    })
+    val clearf = ltrqueryDAO.clearCheckedFlg(ltrid)
+    Await.ready(clearf, scala.concurrent.duration.Duration.Inf)
+    val delf = ltrannotationDAO.deleteByLtrid(ltrid)
+    Await.ready(delf, scala.concurrent.duration.Duration.Inf)
     Redirect("/ltrdashboard/" + ltrid + "/query")
   }
 
   def clearAnnotation(ltrid: Int, qid : Int) = Action { request =>
-    ltrannotationDAO.deleteByQid(qid)
+    val delfa = ltrannotationDAO.deleteByQid(qid)
+    Await.ready(delfa, scala.concurrent.duration.Duration.Inf)
     val fq: Future[Ltrquery] = ltrqueryDAO.get(qid)
     val ltrquery = Await.result(fq, scala.concurrent.duration.Duration.Inf)
     val fu: Future[Int] = ltrqueryDAO.update(ltrquery.copy(checked_flg = false))
@@ -195,17 +193,21 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
       case Some(c) => c
       case _ => "asc"
     }
-    val total = ltrqueryDAO.totalCountByLtrid(ltrid)
-    val res = ltrqueryDAO.fetchByLtrid(ltrid, sort, order, offset, size)
+    val totalf = ltrqueryDAO.totalCountByLtrid(ltrid)
+    val total = Await.result(totalf, scala.concurrent.duration.Duration.Inf)
+    val qlistf = ltrqueryDAO.fetchByLtrid(ltrid, "qid", "asc", 0, total)
+    val qlist = Await.result(qlistf, scala.concurrent.duration.Duration.Inf)
     val jsonResponse = Json.obj(
       "total" -> total,
-      "rows" -> Json.toJson(res)
+      "rows" -> Json.toJson(qlist)
     )
     Ok(jsonResponse)
   }
 
   def nextQuery(ltrid: Int, qid : Int) = Action {
-    val ltrquery =ltrqueryDAO.fetchNext(ltrid, qid) match {
+    val f =ltrqueryDAO.fetchNext(ltrid, qid)
+    val res = Await.result(f, scala.concurrent.duration.Duration.Inf)
+    val ltrquery = res match {
       case Some(x) => x
       case _ => Ltrquery(Some(0), "", ltrid, false)
     }
@@ -213,7 +215,8 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
   }
 
   def deleteQuery(ltrid: Int, qid : Int) = Action.async {
-    ltrannotationDAO.deleteByQid(qid)
+    val delfa = ltrannotationDAO.deleteByQid(qid)
+    Await.ready(delfa, scala.concurrent.duration.Duration.Inf)
     val f: Future[Int] = ltrqueryDAO.delete(qid)
     Await.ready(f, scala.concurrent.duration.Duration.Inf)
     Future.successful(Ok(Json.toJson(ActionResult(true, Seq("success")))))
@@ -309,9 +312,10 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     } else {
       qid
     }
-    ltrannotationDAO.deleteByQid(saveQid)
+    val delfa = ltrannotationDAO.deleteByQid(saveQid)
+    Await.ready(delfa, scala.concurrent.duration.Duration.Inf)
     val list = labels.map(label => {
-      Ltrannotation(saveQid, label._1, label._2)
+      Ltrannotation(saveQid, label._1, label._2, ltrid)
     })
     ltrannotationDAO.insertList(list)
     val fq: Future[Ltrquery] = ltrqueryDAO.get(saveQid)
@@ -327,9 +331,11 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
   def startFeatureEtraction(ltrid: Int) = Action {
     val f: Future[Ltrconfig] = ltrconfigDAO.get(ltrid)
     val ltr = Await.result(f, scala.concurrent.duration.Duration.Inf)
-    
-    val qCount = ltrqueryDAO.totalCountByLtrid(ltrid)
-    val qlist = ltrqueryDAO.fetchByLtrid(ltrid, "qid", "asc", 0, qCount)
+
+    val totalf = ltrqueryDAO.totalCountByLtrid(ltrid)
+    val total = Await.result(totalf, scala.concurrent.duration.Duration.Inf)
+    val qlistf = ltrqueryDAO.fetchByLtrid(ltrid, "qid", "asc", 0, total)
+    val qlist = Await.result(qlistf, scala.concurrent.duration.Duration.Inf)
 
     var dtos: List[FeatureExtractDTO] = List()
     qlist.map { q =>
@@ -338,7 +344,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
       val dto: FeatureExtractDTO = FeatureExtractDTO(q.qid.getOrElse(0), q.query, docs.map(_.docid).toList)
       dtos = dtos :+ dto
     }
-    val fedtos = FeatureExtractDTOs(ltr.ltrid.getOrElse(0), ltr.featureExtractUrl, ltr.featureProgressUrl, ltr.featureRetrieveUrl, ltr.docUniqField, dtos)
+    val fedtos = FeatureExtractDTOs(ltr.ltrid.getOrElse(0), ltr.featureExtractUrl, ltr.featureExtractConfig, ltr.docUniqField, dtos)
     
     progressActor ! FeatureExtractStartMsg(fedtos)
     Ok(Json.toJson(ActionResult(true, Seq("started"))))
@@ -364,7 +370,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     val ltr = Await.result(f, scala.concurrent.duration.Duration.Inf)
     val runid = ltrmodelDAO.nextRunId(ltrid)
     val feature_list = request.getQueryString("features").get
-    val ltrmodel: Ltrmodel = Ltrmodel(None,ltrid,runid,feature_list,None,0,0,Some(new DateTime()),None)
+    val ltrmodel: Ltrmodel = Ltrmodel(None,ltrid,runid,feature_list,None,0,0,"",Some(new DateTime()),None)
     val fm: Future[Ltrmodel] = ltrmodelDAO.insert(ltrmodel)
     val newModel = Await.result(fm, scala.concurrent.duration.Duration.Inf)
 
@@ -376,7 +382,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     val fd = docFeatureDAO.fetchByFids(selected)
     val docFeatures: Seq[DocFeature] = Await.result(fd, scala.concurrent.duration.Duration.Inf)
 
-    val fl = ltrannotationDAO.fetchAll() // TODO: filter
+    val fl = ltrannotationDAO.fetchByLtrid(ltrid)
     val ltrannotations = Await.result(fl, scala.concurrent.duration.Duration.Inf)
 
     val anMap = ltrannotations.map(a => (a.qid, a.docid) -> a.label).toMap
