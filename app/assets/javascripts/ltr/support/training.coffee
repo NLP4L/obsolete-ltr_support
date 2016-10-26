@@ -31,10 +31,10 @@ $ ->
             fids += ","
         fids += fid
     $.ajax
-      url: '/ltr/model/' + ltrid + '?features=' + fids,
+      url: '/ltr/training/' + ltrid + '?features=' + fids,
       type: 'GET',
       success: (data) ->
-        jump = '/ltrdashboard/' + ltrid + '/model/' + data.mid
+        jump = '/ltrdashboard/' + ltrid + '/training/' + data.mid
         location.replace(jump)
     return
 

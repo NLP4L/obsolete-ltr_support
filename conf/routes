@@ -38,9 +38,9 @@ GET           /ltrdashboard/$ltrid<[0-9]+>/query                       @org.nlp4
 GET           /ltrdashboard/$ltrid<[0-9]+>/annotation                  @org.nlp4l.ltr.support.controllers.LtrDashboard.annotation(ltrid: Int)
 GET           /ltrdashboard/$ltrid<[0-9]+>/annotation/$qid<[0-9]+>     @org.nlp4l.ltr.support.controllers.LtrDashboard.editAnnotation(ltrid: Int, qid: Int)
 GET           /ltrdashboard/$ltrid<[0-9]+>/feature                     @org.nlp4l.ltr.support.controllers.LtrDashboard.feature(ltrid: Int)
-GET           /ltrdashboard/$ltrid<[0-9]+>/model                       @org.nlp4l.ltr.support.controllers.LtrDashboard.model(ltrid: Int)
-GET           /ltrdashboard/$ltrid<[0-9]+>/model/new                   @org.nlp4l.ltr.support.controllers.LtrDashboard.newModel(ltrid: Int)
-GET           /ltrdashboard/$ltrid<[0-9]+>/model/$mid<[0-9]+>          @org.nlp4l.ltr.support.controllers.LtrDashboard.modelStatus(ltrid: Int, mid: Int)
+GET           /ltrdashboard/$ltrid<[0-9]+>/training                    @org.nlp4l.ltr.support.controllers.LtrDashboard.training(ltrid: Int)
+GET           /ltrdashboard/$ltrid<[0-9]+>/training/new                @org.nlp4l.ltr.support.controllers.LtrDashboard.newTraining(ltrid: Int)
+GET           /ltrdashboard/$ltrid<[0-9]+>/training/$mid<[0-9]+>       @org.nlp4l.ltr.support.controllers.LtrDashboard.trainingStatus(ltrid: Int, mid: Int)
 
 
 
@@ -62,5 +62,5 @@ GET           /ltr/feature/$ltrid<[0-9]+>                              @org.nlp4
 GET           /ltr/feature/$ltrid<[0-9]+>/progress                     @org.nlp4l.ltr.support.controllers.LtrController.getFeatureProgress(ltrid: Int)
 GET           /ltr/feature/$ltrid<[0-9]+>/message                      @org.nlp4l.ltr.support.controllers.LtrController.getFeatureProgressMessage(ltrid: Int)
 GET           /ltr/feature/$ltrid<[0-9]+>/clear                        @org.nlp4l.ltr.support.controllers.LtrController.clearFeatureProgress(ltrid: Int)
-GET           /ltr/model/$ltrid<[0-9]+>                                @org.nlp4l.ltr.support.controllers.LtrController.startModelCreation(ltrid: Int)
+GET           /ltr/training/$ltrid<[0-9]+>                             @org.nlp4l.ltr.support.controllers.LtrController.startTraining(ltrid: Int)
 

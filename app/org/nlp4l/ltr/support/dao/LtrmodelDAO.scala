@@ -93,7 +93,7 @@ class LtrmodelDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
   }
 
   def fetchByLtrid(ltrid: Int): Future[Seq[Ltrmodel]] = {
-    db.run(ltrmodels.filter(_.ltrid === ltrid).sortBy(_.mid.asc).result)
+    db.run(ltrmodels.filter(_.ltrid === ltrid).sortBy(_.runid.desc).result)
   }
 
   def nextRunId(ltrid: Int): Int = {

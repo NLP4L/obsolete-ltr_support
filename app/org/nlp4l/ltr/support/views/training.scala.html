@@ -34,10 +34,10 @@
     <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
             <ul class="nav nav-sidebar">
-                <li><a href="/ltrdashboard/@currentLtrid/model/new">New <span class="sr-only"/></a></li>
+                <li><a href="/ltrdashboard/@currentLtrid/training/new">New <span class="sr-only"/></a></li>
 
                 @for(aLtrModel <- ltrmodels) {
-                <li><a href="/ltrdashboard/@currentLtrid/model/@aLtrModel.mid">#@aLtrModel.runid <span class="sr-only"/></a></li>
+                <li><a href="/ltrdashboard/@currentLtrid/training/@aLtrModel.mid">#@aLtrModel.runid <span class="sr-only"/></a></li>
                 }
 
             </ul>

@@ -365,7 +365,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     Ok(Json.toJson(ActionResult(true, Seq("cleared"))))
   }
 
-  def startModelCreation(ltrid: Int) = Action { request =>
+  def startTraining(ltrid: Int) = Action { request =>
     val f: Future[Ltrconfig] = ltrconfigDAO.get(ltrid)
     val ltr = Await.result(f, scala.concurrent.duration.Duration.Inf)
     val runid = ltrmodelDAO.nextRunId(ltrid)
