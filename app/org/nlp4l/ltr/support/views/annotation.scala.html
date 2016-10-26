@@ -35,7 +35,7 @@
     <div class="row">
       <div class="col-sm-9 col-md-10 main">
          <table class="table">
-         <tr><td  align="right" colspan="4" class="text-default" style="border: 0;">Saved Data: @count._1 / @count._2</td></tr>
+         <tr><td  align="right" colspan="4" class="text-default" style="border: 0;">Saved Data: <span id="saved_count">@count._1</span> / <span id="total_count">@count._2</span></td></tr>
          <tr>
            <td>
              <font size="+2"><b>Query = </b></font>
@@ -326,6 +326,8 @@ $('#save-button').on('click', function(event) {
                   currentQid = json_data.qid
                 } else
                   $("#search_result_msg").html("<div class=\"alert alert-danger\">Saved successfully.</div>");
+                $("#saved_count").html(json_data.saved);
+                $("#total_count").html(json_data.total);
         },
         error: function(jqXHR, textStatus, errorThrown) {
             $("#search_result_msg").html(textStatus + ": " + errorThrown + "<br>" + jqXHR.responseText);

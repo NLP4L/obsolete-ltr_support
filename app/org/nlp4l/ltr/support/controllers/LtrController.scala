@@ -322,8 +322,14 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     val ltrquery = Await.result(fq, scala.concurrent.duration.Duration.Inf)
     val fu: Future[Int] = ltrqueryDAO.update(ltrquery.copy(checked_flg = true))
     Await.ready(fu, scala.concurrent.duration.Duration.Inf)
+    val totalf = ltrqueryDAO.totalCountByLtrid(ltrid)
+    val total = Await.result(totalf, scala.concurrent.duration.Duration.Inf)
+    val savedf = ltrqueryDAO.totalSavedCountByLtrid(ltrid)
+    val saved = Await.result(savedf, scala.concurrent.duration.Duration.Inf)
     val jsonResponse = Json.obj(
-      "qid" -> saveQid
+      "qid" -> saveQid,
+      "saved" -> saved,
+      "total" -> total
     )
     Ok(jsonResponse)
   }
