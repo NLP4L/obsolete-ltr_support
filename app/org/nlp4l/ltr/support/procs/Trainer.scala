@@ -18,17 +18,75 @@ package org.nlp4l.ltr.support.procs
 
 import com.typesafe.config.Config
 
+import scala.collection.convert.WrapAsScala._
 
 
 
-abstract class TrainerFactory(settings: Config) {
+
+abstract class TrainerFactory(settings: Config) extends ConfiguredFactory(settings) {
   def getInstance(): Trainer
 }
 
 trait Trainer {
-
   def train(featureNames: Array[String],
             features: Array[Vector[Float]],
             labels: Array[Int],
-            maxLabel: Int) : String
+            maxLabel: Int,
+            progress: TrainingProgress) : String
+}
+
+trait TrainingProgress {
+  def report(progress: Int)
+}
+
+abstract class ConfiguredFactory(val settings: Config){
+  def getStrParam(name: String, default: String): String = {
+    if(settings.hasPath(name)) settings.getString(name) else default
+  }
+  def getStrParamRequired(name: String): String = {
+    settings.getString(name)
+  }
+  def getIntParam(name: String, default: Int): Int = {
+    if(settings.hasPath(name)) settings.getInt(name) else default
+  }
+  def getIntParamRequired(name: String): Int = {
+    settings.getInt(name)
+  }
+  def getLongParam(name: String, default: Long): Long = {
+    if(settings.hasPath(name)) settings.getLong(name) else default
+  }
+  def getLongParamRequired(name: String): Long = {
+    settings.getLong(name)
+  }
+  def getDoubleParam(name: String, default: Double): Double = {
+    if(settings.hasPath(name)) settings.getDouble(name) else default
+  }
+  def getDoubleParamRequired(name: String): Double = {
+    settings.getDouble(name)
+  }
+  def getBoolParam(name: String, default: Boolean): Boolean = {
+    if(settings.hasPath(name)) settings.getBoolean(name) else default
+  }
+  def getBoolParamRequired(name: String): Boolean = {
+    settings.getBoolean(name)
+  }
+  def getStrListParam(name: String, default: Seq[String]): Seq[String] = {
+    if(settings.hasPath(name)) settings.getStringList(name) else default
+  }
+  def getStrListParamRequired(name: String): Seq[String] = {
+    settings.getStringList(name)
+  }
+  def getConfigParam(name: String, default: Config): Config = {
+    if(settings.hasPath(name)) settings.getConfig(name) else default
+  }
+  def getConfigParamRequired(name: String): Config = {
+    settings.getConfig(name)
+  }
+  def getConfigListParam(name: String, default: Seq[Config]): Seq[Config] = {
+    if(settings.hasPath(name)) settings.getConfigList(name) else default
+  }
+  def getConfigListParamRequired(name: String): Seq[Config] = {
+    settings.getConfigList(name)
+  }
+
 }

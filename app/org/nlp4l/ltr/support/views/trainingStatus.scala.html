@@ -42,7 +42,17 @@
             </ul>
         </div>
 
+
         <div class="col-sm-9 col-md-10 main">
+
+            <div class="row">
+                <div class="col-sm-3 col-md-2">
+                </div>
+                <div class="col-sm-6 col-md-8">
+                    <progress value="0" id="p" max=100 style="margin: 5px; height: 30px; width: 100%;-webkit-appearance: none; -moz-appearance: none; appearance: none;"></progress>
+                </div>
+            </div>
+                <p style="margin: 30px; width: 90%;" class="text-danger" id="errormsg">@error</p>
 
             <div class="row">
                 <div class="col-md-4">
@@ -85,6 +95,56 @@
     </form>
 
   </div>
+
+  <script>
+	var progressBar = document.getElementById('p');
+	var progressValue = document.getElementById('pv');
+	var progressStatus = document.getElementById('status');
+	var errorMsg = document.getElementById('errormsg');
+
+	function updateProgress() {
+		getProgressValue().done(function(result) {
+			var newValue = result;
+			if (newValue >= 100 || newValue < 0) {
+            	window.location.href = "/ltrdashboard/@currentLtrid/training/@ltrmodel.mid.get";
+				return;
+			}
+			progressBar.value = newValue;
+			progressValue.innerHTML = newValue;
+    		progressStatus.innerHTML = "<h4><span class=\"label label-warning\">RUNNING</span></h4>";
+			setTimeout(function() {
+				updateProgress();
+			}, 1000);
+		});
+	}
+
+	function getProgressValue() {
+		return $.ajax({
+			type : 'GET',
+			url : '/ltr/training/@currentLtrid/progress/@ltrmodel.runid'
+		});
+	}
+    function updateStatus() {
+        var status = @ltrmodel.status;
+        var progress = @ltrmodel.progress;
+        if (status < 0) {
+		   	progressBar.value = 0;
+			progressValue.innerHTML = -1;
+		   	progressStatus.innerHTML = "<h4><span class=\"label label-danger\">ERROR</span></h4>";
+			errorMsg.innerHTML = "@ltrmodel.message";
+		   	return;
+        }
+        if (status != 0 || progress >= 100) {
+			progressBar.value = 100;
+			progressValue.innerHTML = 100;
+			progressStatus.innerHTML = "<h4><span class=\"label label-success\">DONE</span></h4>";
+			errorMsg.innerHTML = "";
+		} else {
+    		updateProgress();
+    	}
+    }
+    updateStatus();
+</script>
 
 }
 

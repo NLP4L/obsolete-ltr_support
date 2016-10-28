@@ -98,7 +98,7 @@ case class Ltrmodel (
     model_data: Option[String],
     status: Int,
     progress: Int,
-    mesage: String,
+    message: String,
     started_at: Option[DateTime],
     finished_at: Option[DateTime]
 )

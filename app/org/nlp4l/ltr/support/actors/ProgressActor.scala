@@ -20,28 +20,23 @@ package org.nlp4l.ltr.support.actors
 import akka.actor.Actor
 import akka.actor.Props
 import javax.inject.Inject
+
 import org.nlp4l.ltr.support.dao.LtrmodelDAO
 import org.nlp4l.ltr.support.dao.LtrconfigDAO
-import org.nlp4l.ltr.support.dao.DocFeatureDAO
 import org.nlp4l.ltr.support.dao.LtrannotationDAO
 import org.nlp4l.ltr.support.dao.LtrqueryDAO
-import org.nlp4l.ltr.support.dao.LtrfeatureDAO
-import java.util.Random
-import akka.actor.ActorRef
+
+import org.joda.time.DateTime
 import play.api.Logger
-import org.nlp4l.ltr.support.models.Ltrconfig
-import org.nlp4l.ltr.support.models.FeatureExtractDTOs
-import org.nlp4l.ltr.support.models.FeatureExtractResults
-import scala.concurrent.Await
-import org.nlp4l.ltr.support.models.FeatureProgress
+import org.nlp4l.ltr.support.models._
+
+import scala.concurrent.{Await, Future}
 import org.nlp4l.ltr.support.dao.DocFeatureDAO
-import org.nlp4l.ltr.support.dao.DocFeatureDAO
+
 import scala.util.Failure
 import scala.util.Success
-import org.nlp4l.ltr.support.models.DocFeature
 import org.nlp4l.ltr.support.dao.FeatureProgressDAO
 import org.nlp4l.ltr.support.dao.LtrfeatureDAO
-import org.nlp4l.ltr.support.models.Ltrfeature
 
 
 
@@ -141,6 +136,43 @@ class ProgressActor @Inject()(docFeatureDAO: DocFeatureDAO,
       val delf = featureProgressDAO.deleteByLtrid(ltrid)
       Await.result(delf, scala.concurrent.duration.Duration.Inf)
     }
+      //
+      // training
+      //
+    case TrainingStartMsg(trainingRequest: TrainingRequest) => {
+      logger.info("TrainingStartMsg received: " + trainingRequest.ltrid + "#" + trainingRequest.runid)
+      context.actorOf(Props[TrainingActor]) ! TrainingStartMsg(trainingRequest)
+    }
+    case TrainingSetResultMsg(trainingResult: TrainingResult) => {
+      logger.info("TrainingSetResultMsg received: " + trainingResult.ltrid + "#" + trainingResult.runid)
+      val fm = ltrmodelDAO.get(trainingResult.ltrid, trainingResult.runid)
+      val ltrmodel: Ltrmodel = Await.result(fm, scala.concurrent.duration.Duration.Inf)
+      val fu: Future[Int] = ltrmodelDAO.update(ltrmodel.copy(model_data = Some(trainingResult.model_data), status =trainingResult.status, message =trainingResult.message, progress =100, finished_at = Some(new DateTime())))
+      Await.ready(fu, scala.concurrent.duration.Duration.Inf)
+    }
+    case TrainingSetProgressMsg(ltrid: Int, runid: Int, progress: Int) => {
+      logger.debug("TrainingSetProgressMsg received: " + ltrid + "#" + runid + "[" + progress + "]")
+      val fm = ltrmodelDAO.get(ltrid, runid)
+      val ltrmodel: Ltrmodel = Await.result(fm, scala.concurrent.duration.Duration.Inf)
+      val fu: Future[Int] = ltrmodelDAO.update(ltrmodel.copy(progress =progress))
+      Await.ready(fu, scala.concurrent.duration.Duration.Inf)
+    }
+    case TrainingGetProgressMsg(ltrid: Int, runid: Int) => {
+      val f = ltrmodelDAO.get(ltrid, runid)
+      Await.ready(f, scala.concurrent.duration.Duration.Inf)
+      f.value.get match {
+        case Success(ltrmodel) => {
+          val n = if (ltrmodel.status < 0) -1 else ltrmodel.progress
+          logger.debug("TrainingGetProgressMsg received: " + ltrid + "#" + runid + " [" + n + "]")
+          sender ! n
+        }
+        case Failure(ex) => {
+          val n = 0
+          logger.error(ex.getMessage, ex)
+          sender ! n
+        }
+      }
+    }
   }
 }
 
@@ -160,6 +192,32 @@ case class FeatureExtractGetProgressMessageMsg(ltrid: Int)
 case class FeatureExtractSetResultMsg(ltrid: Int, result: FeatureExtractResults)
 // Clear a result of the feature extraction
 case class FeatureExtractClearResultMsg(ltrid: Int)
+
+
+// Start a training
+case class TrainingStartMsg(trainingRequest: TrainingRequest)
+// Set a progress value of the training
+case class TrainingSetProgressMsg(ltrid: Int, runid: Int, progress: Int)
+// Get a progress value of the training
+case class TrainingGetProgressMsg(ltrid: Int, runid: Int)
+// Set the result of the training
+case class TrainingSetResultMsg(trainingResult: TrainingResult)
+
+case class TrainingRequest(
+  ltrid: Int,
+  runid: Int,
+  ltrconfig: Ltrconfig,
+  selectedFeatures: Seq[Ltrfeature],
+  docFeatures: Seq[DocFeature],
+  ltrannotations: Seq[Ltrannotation]
+)
+case class TrainingResult(
+  ltrid: Int,
+  runid: Int,
+  status: Int,
+  message: String,
+  model_data: String
+)
 
 
 // DEMO

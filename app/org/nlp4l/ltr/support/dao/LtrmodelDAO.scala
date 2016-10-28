@@ -64,6 +64,10 @@ class LtrmodelDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
     db.run(query.result.head)
   }
 
+  def get(ltrid: Int, runid: Int): Future[Ltrmodel] = {
+    db.run(ltrmodels.filter(_.ltrid === ltrid).filter(_.runid === runid).result.head)
+  }
+
   def insert(Ltrmodel: Ltrmodel): Future[Ltrmodel] = {
     val LtrmodelWithId = (ltrmodels returning ltrmodels.map(_.mid) into ((Ltrmodel, id) => Ltrmodel.copy(mid=Some(id)))) += Ltrmodel
     db.run(LtrmodelWithId)

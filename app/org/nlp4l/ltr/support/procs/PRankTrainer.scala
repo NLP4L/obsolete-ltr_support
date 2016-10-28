@@ -18,29 +18,32 @@ package org.nlp4l.ltr.support.procs
 
 import com.typesafe.config.Config
 import play.api.Logger
-import play.api.libs.json.{JsObject, Json, JsNumber}
+import play.api.libs.json.{Json}
 
 
 
 
 class PRankTrainerFactory(settings: Config) extends TrainerFactory(settings: Config) {
   def getInstance(): Trainer = {
-    new PRankTrainer()
+    new PRankTrainer(getIntParam("loopCount", 10000))
   }
 }
 
-class PRankTrainer extends Trainer  {
+class PRankTrainer(val loopCount: Int) extends Trainer  {
+
   private val logger = Logger(this.getClass)
 
   def train(featureNames: Array[String],
             features: Array[Vector[Float]],
             labels: Array[Int],
-            maxLabel: Int) : String = {
+            maxLabel: Int,
+            progress: TrainingProgress) : String = {
     logger.info("train start.")
     logger.info("featureNames: " + featureNames.toSeq)
     logger.info("maxLabel: " + maxLabel)
     logger.info("labels length: " + labels.length)
-    val prank = new PRank(features, labels, featureNames.length, maxLabel, 10000)
+    logger.info("loopCount: " + loopCount)
+    val prank = new PRank(features, labels, featureNames.length, maxLabel, loopCount, progress)
     val wb = prank.train()
     val weights = for(e <- featureNames.zipWithIndex) yield Json.obj("name" -> e._1, "weight" -> wb._1(e._2))
     val bs = Json.toJson(wb._2)
@@ -59,7 +62,7 @@ class PRankTrainer extends Trainer  {
   }
 }
 
-class PRank(x: Array[Vector[Float]], y: Array[Int], featureNum: Int, maxLabel: Int, loopCount: Int) {
+class PRank(x: Array[Vector[Float]], y: Array[Int], featureNum: Int, maxLabel: Int, loopCount: Int, progress: TrainingProgress) {
 
   var w: Vector[Float] = Vector.fill(featureNum)(0F)
   val b: Array[Float] = Array.fill(maxLabel)(0F)
@@ -87,7 +90,12 @@ class PRank(x: Array[Vector[Float]], y: Array[Int], featureNum: Int, maxLabel: I
           b(r - 1) = b(r - 1) - tau(r - 1)
         }
       }
+      if (t % (loopCount / 100) == 0) {
+        progress.report(t / (loopCount / 100))
+//        Thread.sleep(300)
+      }
     }
+    progress.report(100)
     (w, b.take(b.size-1).toVector)
   }
 

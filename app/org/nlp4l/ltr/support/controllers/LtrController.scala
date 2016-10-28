@@ -31,9 +31,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 import scala.util.Failure
 import scala.util.Success
-import org.nlp4l.ltr.support.actors.FeatureExtractClearResultMsg
-import org.nlp4l.ltr.support.actors.FeatureExtractGetProgressMsg
-import org.nlp4l.ltr.support.actors.FeatureExtractStartMsg
+import org.nlp4l.ltr.support.actors._
 import org.nlp4l.ltr.support.dao.DocFeatureDAO
 import org.nlp4l.ltr.support.dao.LtrfeatureDAO
 import org.nlp4l.ltr.support.dao.LtrannotationDAO
@@ -59,7 +57,6 @@ import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.api.mvc.Action
 import play.api.mvc.Controller
 import org.nlp4l.ltr.support.dao.FeatureProgressDAO
-import org.nlp4l.ltr.support.actors.FeatureExtractGetProgressMessageMsg
 import org.nlp4l.ltr.support.procs.PRankTrainerFactory
 
 class LtrController @Inject()(docFeatureDAO: DocFeatureDAO, 
@@ -385,34 +382,15 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     val selected: Array[Int] = feature_list.split(",").map(f => f.toInt)
     val selectedFeatureList = featureList.filter(f => selected.contains(f.fid.get))
 
-    val fd = docFeatureDAO.fetchByFids(selected)
+    val fd = docFeatureDAO.fetchByFids(ltrid, selected)
     val docFeatures: Seq[DocFeature] = Await.result(fd, scala.concurrent.duration.Duration.Inf)
 
     val fl = ltrannotationDAO.fetchByLtrid(ltrid)
     val ltrannotations = Await.result(fl, scala.concurrent.duration.Duration.Inf)
 
-    val anMap = ltrannotations.map(a => (a.qid, a.docid) -> a.label).toMap
-    val dfMap = docFeatures.map(a => (a.qid, a.docid, a.fid) -> a.value).toMap
-    val fkeys = docFeatures.map(a => (a.qid, a.docid)).distinct.sorted
+    val trainingRequest = TrainingRequest(ltrid, runid, ltr, selectedFeatureList, docFeatures, ltrannotations)
 
-    val features: Array[Vector[Float]] = fkeys.map(fkey => {
-      selectedFeatureList.map(f => {
-        dfMap.getOrElse((fkey._1, fkey._2, f.fid.get), 0.0F)
-      }).toVector
-    }).toArray
-
-    val labels: Array[Int] = fkeys.map(fkey => {
-        anMap.getOrElse((fkey._1, fkey._2),0)
-    }).toArray
-
-    val featureNames = selectedFeatureList.map(_.name).toArray
-
-    // for now, we call it directly.
-    val factory = new PRankTrainerFactory(null)
-    val trainer = factory.getInstance()
-    val result = trainer.train(featureNames, features, labels, ltr.labelMax + 1)
-    val fu: Future[Int] = ltrmodelDAO.update(newModel.copy(model_data = Some(result), status =1, progress =1, finished_at = Some(new DateTime())))
-    Await.ready(fu, scala.concurrent.duration.Duration.Inf)
+    progressActor ! TrainingStartMsg(trainingRequest)
 
     val jsonResponse = Json.obj(
       "mid" -> newModel.mid.get
@@ -420,6 +398,10 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     Ok(jsonResponse)
   }
 
+  def getTrainingProgress(ltrid: Int, runid: Int) = Action.async {
+    val f = pa ? TrainingGetProgressMsg(ltrid, runid)
+    f.map(result => Ok(result.toString()))
+  }
 
 }
 
