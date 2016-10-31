@@ -46,7 +46,7 @@ class TrainingExecutor(sender: ActorRef) extends TrainingProgressReport {
       val settings = trainingRequest.ltrconfig.trainerFactoryClassSettings
       val config = if (settings.isDefined) ConfigFactory.parseString(settings.get) else ConfigFactory.empty()
 
-      val constructor = Class.forName(trainingRequest.ltrconfig.trainerFactryClassName).getConstructor(classOf[Config])
+      val constructor = Class.forName(trainingRequest.ltrconfig.trainerFactoryClassName).getConstructor(classOf[Config])
       val factory = constructor.newInstance(config).asInstanceOf[TrainerFactory]
       val trainer = factory.getInstance()
       val progressSender = new TrainingProgressSender(sender, trainingRequest.ltrid, trainingRequest.runid)

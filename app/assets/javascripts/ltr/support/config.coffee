@@ -45,8 +45,8 @@ $ ->
     name = $('#name').val()
     annotationType = $('#annotationType').val()
     labelMax = $('#labelMax').val()
-    trainerFactryClassName = $('#trainerFactryClassName').val()
-    deployerFactryClassName = $('#deployerFactryClassName').val()
+    trainerFactoryClassName = $('#trainerFactoryClassName').val()
+    deployerFactoryClassName = $('#deployerFactoryClassName').val()
     searchUrl = $('#searchUrl').val()
     featureExtractUrl = $('#featureExtractUrl').val()
     featureExtractConfig = $('#featureExtractConfig').val()
@@ -54,7 +54,7 @@ $ ->
     docTitleField = $('#docTitleField').val()
     docBodyField = $('#docBodyField').val()
 
-    if (name.length > 0 && annotationType.length > 0 && labelMax.length > 0 && trainerFactryClassName.length > 0 && deployerFactryClassName.length > 0 && searchUrl.length > 0 && featureExtractUrl.length > 0 && featureExtractConfig.length > 0 && docUniqField.length > 0 && docTitleField.length > 0&& docBodyField.length > 0)
+    if (name.length > 0 && annotationType.length > 0 && labelMax.length > 0 && trainerFactoryClassName.length > 0 && deployerFactoryClassName.length > 0 && searchUrl.length > 0 && featureExtractUrl.length > 0 && featureExtractConfig.length > 0 && docUniqField.length > 0 && docTitleField.length > 0&& docBodyField.length > 0)
       $('#save-button').prop('disabled', false)
     else
       $('#save-button').prop('disabled', true)
@@ -69,10 +69,10 @@ $ ->
   $('#labelMax').keyup ->
     check_input()
     
-  $('#trainerFactryClassName').keyup ->
+  $('#trainerFactoryClassName').keyup ->
     check_input()
     
-  $('#deployerFactryClassName').keyup ->
+  $('#deployerFactoryClassName').keyup ->
     check_input()
 
   $('#searchUrl').keyup ->
@@ -94,9 +94,9 @@ $ ->
     name = $('#name').val()
     annotationType = $('#annotationType').val()
     labelMax = $('#labelMax').val()
-    trainerFactryClassName = $('#trainerFactryClassName').val()
+    trainerFactoryClassName = $('#trainerFactoryClassName').val()
     trainerFactoryClassSettings = $('#trainerFactoryClassSettings').val()
-    deployerFactryClassName = $('#deployerFactryClassName').val()
+    deployerFactoryClassName = $('#deployerFactoryClassName').val()
     deployerFactoryClassSettings = $('#deployerFactoryClassSettings').val()
     searchUrl = $('#searchUrl').val()
     featureExtractUrl = $('#featureExtractUrl').val()
@@ -112,9 +112,9 @@ $ ->
       	"name": name, 
       	"annotationType":annotationType,
       	"labelMax":labelMax,
-      	"trainerFactryClassName":trainerFactryClassName,
+      	"trainerFactoryClassName":trainerFactoryClassName,
       	"trainerFactoryClassSettings":trainerFactoryClassSettings,
-      	"deployerFactryClassName":deployerFactryClassName,
+      	"deployerFactoryClassName":deployerFactoryClassName,
       	"deployerFactoryClassSettings":deployerFactoryClassSettings,
       	"searchUrl":searchUrl,
       	"featureExtractUrl":featureExtractUrl,

@@ -68,12 +68,33 @@
                                         <strong>Are you sure to deploy this model?</strong>
                                     </p>
                                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                                    <button id="deploy" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                                    <button id="deploy" type="button" class="btn btn-primary" data-dismiss="modal" data-toggle="modal" data-target="#deployResultModal">OK</button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <!-- Modal -->
+                <div class="modal fade" id="deployResultModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                    <div class="modal-dialog modal-lg" role="document">
+
+                      <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="gridSystemModalLabel">Deploy</h4>
+                        </div>
+                        <div class="modal-body">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                          <p>
+                          <p id="deployResult">
+                                <button class="btn btn-lg btn-info"><span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Deploying...</button>
+                          </p>
+
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                <!-- Modal -->
+
                 <div class="col-sm-2 pull-right">
                     <button id="delete-button" type="button" class="btn btn-warning pull-right" data-toggle="modal" data-target="#deleteModal" @if(ltrmodel.status==0) { disabled }><i class="glyphicon glyphicon-trash"></i> Delete</button>
                     <!-- Modal -->
@@ -163,6 +184,33 @@
     	}
     }
     updateStatus();
+
+    $('#deployResultModal').on('show.bs.modal', function (event) {
+	  $('#deployResult').html("<button class=\"btn btn-lg btn-info\"><span class=\"glyphicon glyphicon-refresh glyphicon-refresh-animate\"></span> Deploying...</button>")
+	  var button = $(event.relatedTarget) // Button that triggered the modal
+	  var url = location.pathname.split('/')
+      var mid = url.pop()
+      url.pop()
+      var ltrid = url.pop()
+	  var modal = $(this)
+	  $.getJSON(
+        '/ltr/training/' + ltrid + '/deploy/' + mid,
+        null,
+    	function(data, status) {
+          if(data.status == false) {
+              var err = "<div class=\"alert alert-danger\" role=\"alert\"><p>Error</p><ul>"
+              for (var key in data.messages) {
+                err += "<li>" + data.messages[key] + "</li>"
+              }
+              err += "</ul></div>"
+              $('#deployResult').html(err)
+          } else {
+              $('#deployResult').html("<div class=\"alert alert-success\" role=\"alert\">Success</div>")
+          }
+		}
+	  );
+	})
+
 </script>
 
 }

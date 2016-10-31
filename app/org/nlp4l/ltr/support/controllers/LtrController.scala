@@ -46,6 +46,7 @@ import akka.pattern.AskableActorRef
 import akka.util.Timeout
 import javax.inject.Inject
 
+import com.typesafe.config.{Config, ConfigFactory}
 import org.joda.time.DateTime
 import play.api.libs.json.JsObject
 import play.api.libs.json.JsValue.jsValueToJsLookup
@@ -54,6 +55,8 @@ import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.api.mvc.Action
 import play.api.mvc.Controller
 import org.nlp4l.ltr.support.dao.FeatureProgressDAO
+import org.nlp4l.ltr.support.procs.DeployerFactory
+import play.api.Logger
 
 class LtrController @Inject()(docFeatureDAO: DocFeatureDAO, 
                              ltrfeatureDAO: LtrfeatureDAO, 
@@ -68,13 +71,15 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
   implicit val timeout = Timeout(5000, TimeUnit.MILLISECONDS)
   val pa = new AskableActorRef(progressActor)
 
+  private val logger = Logger(this.getClass)
+
   def saveLtrConfig(ltrid: Int) = Action.async(parse.json) { request =>
     val data = request.body
     val name = (data \ "name").as[String]
     val annotationType = (data \ "annotationType").as[String]
-    val trainerFactryClassName = (data \ "trainerFactryClassName").as[String]
+    val trainerFactoryClassName = (data \ "trainerFactoryClassName").as[String]
     val trainerFactoryClassSettings = (data \ "trainerFactoryClassSettings").as[String]
-    val deployerFactryClassName = (data \ "deployerFactryClassName").as[String]
+    val deployerFactoryClassName = (data \ "deployerFactoryClassName").as[String]
     val deployerFactoryClassSettings = (data \ "deployerFactoryClassSettings").as[String]
     val searchUrl = (data \ "searchUrl").as[String]
     val featureExtractUrl = (data \ "featureExtractUrl").as[String]
@@ -87,7 +92,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     if (name.isEmpty) {
       Future.successful(BadRequest("Name cannot be empty."))
     } else {
-      val newLtr: Ltrconfig = Ltrconfig(Some(ltrid), name, annotationType, trainerFactryClassName, Some(trainerFactoryClassSettings), deployerFactryClassName, Some(deployerFactoryClassSettings), searchUrl, featureExtractUrl, featureExtractConfig, docUniqField, docTitleField, docBodyField, labelMax.toInt)
+      val newLtr: Ltrconfig = Ltrconfig(Some(ltrid), name, annotationType, trainerFactoryClassName, Some(trainerFactoryClassSettings), deployerFactoryClassName, Some(deployerFactoryClassSettings), searchUrl, featureExtractUrl, featureExtractConfig, docUniqField, docTitleField, docBodyField, labelMax.toInt)
       val f: Future[Ltrconfig] = ltrconfigDAO.get(ltrid)
       Await.ready(f, scala.concurrent.duration.Duration.Inf)
       f.value.get match {
@@ -407,14 +412,31 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     f.map(result => Ok(result.toString()))
   }
 
-  def deleteTraining(ltrid: Int, runid : Int) = Action.async {
-    val fm = ltrmodelDAO.get(ltrid, runid)
-    val ltrmodel: Ltrmodel = Await.result(fm, scala.concurrent.duration.Duration.Inf)
-    val fd: Future[Int] = ltrmodelDAO.delete(ltrmodel.mid.get)
+  def deleteTraining(ltrid: Int, mid : Int) = Action.async {
+    val fd: Future[Int] = ltrmodelDAO.delete(mid)
     Await.ready(fd, scala.concurrent.duration.Duration.Inf)
     Future.successful(Ok(Json.toJson(ActionResult(true, Seq("success")))))
   }
 
+  def deployModel(ltrid: Int, mid : Int) = Action {
+    val f: Future[Ltrconfig] = ltrconfigDAO.get(ltrid)
+    val ltrconfig = Await.result(f, scala.concurrent.duration.Duration.Inf)
+    val fm = ltrmodelDAO.get(mid)
+    val ltrmodel: Ltrmodel = Await.result(fm, scala.concurrent.duration.Duration.Inf)
+    try {
+      val settings = ltrconfig.deployerFactoryClassSettings
+      val config = if (settings.isDefined) ConfigFactory.parseString(settings.get) else ConfigFactory.empty()
+      val constructor = Class.forName(ltrconfig.deployerFactoryClassName).getConstructor(classOf[Config])
+      val factory = constructor.newInstance(config).asInstanceOf[DeployerFactory]
+      val deployer = factory.getInstance()
+      deployer.deploy(ltrmodel.model_data.get)
+      Ok(Json.toJson(ActionResult(true, Seq("deployed."))))
+    } catch {
+      case e: Exception =>
+        logger.error(e.getMessage, e)
+        Ok(Json.toJson(ActionResult(false, Seq(e.getMessage))))
+    }
+  }
 }
 
 

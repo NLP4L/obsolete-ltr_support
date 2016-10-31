@@ -90,3 +90,12 @@ abstract class ConfiguredFactory(val settings: Config){
   }
 
 }
+
+abstract class DeployerFactory(settings: Config) extends ConfiguredFactory(settings){
+  def getInstance(): Deployer
+}
+
+trait Deployer {
+  def deploy (model_data: String): Unit
+}
+

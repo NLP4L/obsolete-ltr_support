@@ -64,5 +64,6 @@ GET           /ltr/feature/$ltrid<[0-9]+>/message                      @org.nlp4
 GET           /ltr/feature/$ltrid<[0-9]+>/clear                        @org.nlp4l.ltr.support.controllers.LtrController.clearFeatureProgress(ltrid: Int)
 GET           /ltr/training/$ltrid<[0-9]+>                             @org.nlp4l.ltr.support.controllers.LtrController.startTraining(ltrid: Int)
 GET           /ltr/training/$ltrid<[0-9]+>/progress/$runid<[0-9]+>     @org.nlp4l.ltr.support.controllers.LtrController.getTrainingProgress(ltrid: Int, runid: Int)
-DELETE        /ltr/training/$ltrid<[0-9]+>/delete/$runid<[0-9]+>       @org.nlp4l.ltr.support.controllers.LtrController.deleteTraining(ltrid: Int, runid: Int)
+DELETE        /ltr/training/$ltrid<[0-9]+>/delete/$mid<[0-9]+>         @org.nlp4l.ltr.support.controllers.LtrController.deleteTraining(ltrid: Int, mid: Int)
+GET           /ltr/training/$ltrid<[0-9]+>/deploy/$mid<[0-9]+>         @org.nlp4l.ltr.support.controllers.LtrController.deployModel(ltrid: Int, mid: Int)
 
