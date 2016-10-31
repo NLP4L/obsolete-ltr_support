@@ -72,8 +72,10 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     val data = request.body
     val name = (data \ "name").as[String]
     val annotationType = (data \ "annotationType").as[String]
-    val modelFactryClassName = (data \ "modelFactryClassName").as[String]
-    val modelFactoryClassSettings = (data \ "modelFactoryClassSettings").as[String]
+    val trainerFactryClassName = (data \ "trainerFactryClassName").as[String]
+    val trainerFactoryClassSettings = (data \ "trainerFactoryClassSettings").as[String]
+    val deployerFactryClassName = (data \ "deployerFactryClassName").as[String]
+    val deployerFactoryClassSettings = (data \ "deployerFactoryClassSettings").as[String]
     val searchUrl = (data \ "searchUrl").as[String]
     val featureExtractUrl = (data \ "featureExtractUrl").as[String]
     val featureExtractConfig = (data \ "featureExtractConfig").as[String]
@@ -85,7 +87,7 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     if (name.isEmpty) {
       Future.successful(BadRequest("Name cannot be empty."))
     } else {
-      val newLtr: Ltrconfig = Ltrconfig(Some(ltrid), name, annotationType, modelFactryClassName, Some(modelFactoryClassSettings), searchUrl, featureExtractUrl, featureExtractConfig, docUniqField, docTitleField, docBodyField, labelMax.toInt)
+      val newLtr: Ltrconfig = Ltrconfig(Some(ltrid), name, annotationType, trainerFactryClassName, Some(trainerFactoryClassSettings), deployerFactryClassName, Some(deployerFactoryClassSettings), searchUrl, featureExtractUrl, featureExtractConfig, docUniqField, docTitleField, docBodyField, labelMax.toInt)
       val f: Future[Ltrconfig] = ltrconfigDAO.get(ltrid)
       Await.ready(f, scala.concurrent.duration.Duration.Inf)
       f.value.get match {

@@ -103,17 +103,17 @@
           	</div><!-- row -->
           	<div class="row">
           		<div class="form-group">
-          			<label class="col-sm-2 control-label" for="modelFactryClassName">Trainer Factory Class</label>
+          			<label class="col-sm-2 control-label" for="trainerFactryClassName">Trainer Factory Class</label>
           			<div class="col-sm-10">
-          				<input type="text" class="form-control" id="modelFactryClassName" value="@ltr.map(d => d.modelFactryClassName).getOrElse("org.nlp4l.ltr.support.procs.PRankTrainerFactory")" required />
+          				<input type="text" class="form-control" id="trainerFactryClassName" value="@ltr.map(d => d.trainerFactryClassName).getOrElse("org.nlp4l.ltr.support.procs.PRankTrainerFactory")" required />
           			</div>
           		</div>
           	</div><!-- row -->
           	<div class="row">
           		<div class="form-group">
-          			<label class="col-sm-2 control-label" for="modelFactoryClassSettings">- settings</label>
+          			<label class="col-sm-2 control-label" for="trainerFactoryClassSettings">- settings</label>
           			<div class="col-sm-10">
-          				<textarea class="form-control" id="modelFactoryClassSettings" rows="1" />@ltr.map(d => d.modelFactoryClassSettings).getOrElse("")</textarea>
+          				<textarea class="form-control" id="trainerFactoryClassSettings" rows="1" />@ltr.map(d => d.trainerFactoryClassSettings).getOrElse("")</textarea>
           			</div>
           		</div>
           	</div><!-- row -->
@@ -162,6 +162,22 @@
           			<label class="col-sm-2 control-label" for="docBodyField">Document Body Field</label>
           			<div class="col-sm-10">
           				<input type="text" class="form-control" id="docBodyField" value="@ltr.map(d => d.docBodyField).getOrElse("body")" required />
+          			</div>
+          		</div>
+          	</div><!-- row -->
+          	<div class="row">
+          		<div class="form-group">
+          			<label class="col-sm-2 control-label" for="deployerFactryClassName">Deployer Factory Class</label>
+          			<div class="col-sm-10">
+          				<input type="text" class="form-control" id="deployerFactryClassName" value="@ltr.map(d => d.deployerFactryClassName).getOrElse("org.nlp4l.ltr.support.procs.HttpFileTransferDeployerFactory")" required />
+          			</div>
+          		</div>
+          	</div><!-- row -->
+          	<div class="row">
+          		<div class="form-group">
+          			<label class="col-sm-2 control-label" for="deployerFactoryClassSettings">- settings</label>
+          			<div class="col-sm-10">
+          				<textarea class="form-control" id="deployerFactoryClassSettings" rows="1" />@ltr.map(d => d.deployerFactoryClassSettings).getOrElse("{ \"deployToUrl\": \"http://localhost:8983/fileReceiver\", \"deployToFile\": \"/opt/solr/nlp4l/ltr_model.json\" }")</textarea>
           			</div>
           		</div>
           	</div><!-- row -->

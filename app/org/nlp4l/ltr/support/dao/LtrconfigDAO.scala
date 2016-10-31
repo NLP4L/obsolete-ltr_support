@@ -48,8 +48,10 @@ class LtrconfigDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     def ltrid = column[Int]("LTRID", O.PrimaryKey, O.AutoInc)
     def name = column[String]("NAME")
     def annotation_type = column[String]("ANNOTATION_TYPE")
-    def model_factory_class_name = column[String]("MODEL_FACTORY_CLASS_NAME")
-    def model_factory_class_settings = column[Option[String]]("MODEL_FACTORY_CLASS_SETTINGS")
+    def trainer_factory_class_name = column[String]("TRAINER_FACTORY_CLASS_NAME")
+    def trainer_factory_class_settings = column[Option[String]]("TRAINER_FACTORY_CLASS_SETTINGS")
+    def deployer_factory_class_name = column[String]("DEPLOYER_FACTORY_CLASS_NAME")
+    def deployer_factory_class_settings = column[Option[String]]("DEPLOYER_FACTORY_CLASS_SETTINGS")
     def search_url = column[String]("SEARCH_URL")
     def feature_extract_url = column[String]("FEATURE_EXTRACT_URL")
     def feature_extract_config = column[String]("FEATURE_EXTRACT_CONFIG")
@@ -57,7 +59,7 @@ class LtrconfigDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvi
     def doc_title_field = column[String]("DOC_TITLE_FIELD")
     def doc_body_field = column[String]("DOC_BODY_FIELD")
     def label_max = column[Int]("LABEL_MAX")
-    def * = (ltrid.?, name, annotation_type, model_factory_class_name, model_factory_class_settings, search_url, feature_extract_url, feature_extract_config, doc_uniq_field, doc_title_field, doc_body_field, label_max) <> (Ltrconfig.tupled, Ltrconfig.unapply)
+    def * = (ltrid.?, name, annotation_type, trainer_factory_class_name, trainer_factory_class_settings, deployer_factory_class_name, deployer_factory_class_settings, search_url, feature_extract_url, feature_extract_config, doc_uniq_field, doc_title_field, doc_body_field, label_max) <> (Ltrconfig.tupled, Ltrconfig.unapply)
   }
 
   val ltrconfigs = TableQuery[LtrconfigTable]
