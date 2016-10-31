@@ -92,7 +92,6 @@ class PRank(x: Array[Vector[Float]], y: Array[Int], featureNum: Int, maxLabel: I
       }
       if (t % (loopCount / 100) == 0) {
         progress.report(t / (loopCount / 100))
-//        Thread.sleep(300)
       }
     }
     progress.report(100)
@@ -110,7 +109,6 @@ class PRank(x: Array[Vector[Float]], y: Array[Int], featureNum: Int, maxLabel: I
   }
 
   def dumpResult(): Unit = {
-    //print(s"w=($w0, $w1), b=(${b(0)}, ${b(1)}, ${b(2)}})")
     println(s"w=($w), b=(${b(0)}, ${b(1)}, ${b(2)}})")
   }
 

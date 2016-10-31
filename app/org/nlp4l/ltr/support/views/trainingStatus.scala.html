@@ -50,15 +50,15 @@
                     <p>Training Status (<span id="pv" style="color:#00b200">@ltrmodel.progress</span>)%</p>
                     <span id="status"><h4><span class=\"label label-success\">&nbsp;</span></h4></span>
                 </div>
-                <div class="col-sm-6 col-md-8">
+                <div class="col-sm-9 col-md-10">
                     <progress value="0" id="p" max=100 style="margin: 5px; height: 30px; width: 100%;-webkit-appearance: none; -moz-appearance: none; appearance: none;"></progress>
                 </div>
             </div>
                 <p style="margin: 30px; width: 90%;" class="text-danger" id="errormsg">@error</p>
 
             <div class="row">
-                <div class="col-md-4">
-                    <button id="deploy-button" type="button" class="btn btn-info" data-toggle="modal" data-target="#deployModal"><i class="glyphicon glyphicon-upload"></i> Deploy</button>
+                <div class="col-sm-2">
+                    <button id="deploy-button" type="button" class="btn btn-info" data-toggle="modal" data-target="#deployModal" @if(ltrmodel.status!=1) { disabled }><i class="glyphicon glyphicon-upload"></i> Deploy</button>
                     <!-- Modal -->
                     <div class="modal fade" id="deployModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
                         <div class="modal-dialog" role="document">
@@ -68,7 +68,24 @@
                                         <strong>Are you sure to deploy this model?</strong>
                                     </p>
                                     <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                                    <button id="create" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                                    <button id="deploy" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-2 pull-right">
+                    <button id="delete-button" type="button" class="btn btn-warning pull-right" data-toggle="modal" data-target="#deleteModal" @if(ltrmodel.status==0) { disabled }><i class="glyphicon glyphicon-trash"></i> Delete</button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-body">
+                                    <p>
+                                        <strong>Are you sure to delete this model?</strong>
+                                    </p>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                    <button id="delete" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
                                 </div>
                             </div>
                         </div>
@@ -136,7 +153,7 @@
 			errorMsg.innerHTML = "@ltrmodel.message";
 		   	return;
         }
-        if (status != 0 || progress >= 100) {
+        if (status != 0) {
 			progressBar.value = 100;
 			progressValue.innerHTML = 100;
 			progressStatus.innerHTML = "<h4><span class=\"label label-success\">DONE</span></h4>";

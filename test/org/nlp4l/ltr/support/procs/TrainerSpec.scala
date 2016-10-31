@@ -1,6 +1,9 @@
 package org.nlp4l.ltr.support.procs
 
+import akka.actor.ActorRef
+import com.typesafe.config.ConfigFactory
 import org.junit.runner.RunWith
+import org.nlp4l.ltr.support.actors.TrainingSetProgressMsg
 import org.nlp4l.ltr.support.models.LtrModels._
 import org.nlp4l.ltr.support.procs.PRankTrainerFactory
 import org.specs2.mutable.Specification
@@ -28,7 +31,7 @@ class TrainerSpec extends Specification {
         4, 4, 4, 4, 4, 4
       )
       val maxLabel = 4
-      val prank = new PRank(features, labels, featureNames.length, maxLabel, 10000)
+      val prank = new PRank(features, labels, featureNames.length, maxLabel, 10005, new TestTrainingProgressSender())
       val wb = prank.train()
 
       prank.dumpResult()
@@ -40,11 +43,17 @@ class TrainerSpec extends Specification {
       prank.test(Vector(0.5F, 5F))
       prank.test(Vector(12F, 4F))
 
-      val factory = new PRankTrainerFactory(null)
+      val factory = new PRankTrainerFactory(ConfigFactory.empty())
       val trainer = factory.getInstance()
-      val result = trainer.train(featureNames, features, labels, maxLabel)
+      val result = trainer.train(featureNames, features, labels, maxLabel, new TestTrainingProgressSender())
       result != ""
     }
 
+  }
+}
+
+class TestTrainingProgressSender() extends TrainingProgress {
+  def report(progress: Int): Unit = {
+    println("progress: " + progress)
   }
 }

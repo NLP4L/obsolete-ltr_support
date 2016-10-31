@@ -105,4 +105,10 @@ class LtrmodelDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
     val res = Await.result(f, scala.concurrent.duration.Duration.Inf)
     if (res > 0) res else 1
   }
+
+  def deleteByLtrid(ltrid: Int): Future[Int] = {
+    val query = ltrmodels.filter(_.ltrid === ltrid)
+    val res = db.run(query.delete)
+    res
+  }
 }

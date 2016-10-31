@@ -17,7 +17,7 @@
 $ ->
 
   url = location.pathname.split('/')
-  url.pop()
+  runid = url.pop()
   url.pop()
   ltrid = url.pop()
 
@@ -37,6 +37,17 @@ $ ->
         jump = '/ltrdashboard/' + ltrid + '/training/' + data.mid
         location.replace(jump)
     return
+
+  $('#delete').click ->
+    $.ajax
+        url:  '/ltr/training/' + ltrid + '/delete/' + runid,
+        type: 'DELETE',
+        async: false,
+        success: (data) ->
+            jump = '/ltrdashboard/' + ltrid + '/training/new'
+            location.replace(jump)
+    return
+
 
 
 

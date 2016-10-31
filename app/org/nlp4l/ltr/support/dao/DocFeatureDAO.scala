@@ -101,4 +101,9 @@ class DocFeatureDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     res
   }
 
+  def deleteByLtrid(ltrid: Int): Future[Int] = {
+    val query = docfeatures.filter(_.ltrid === ltrid)
+    val res = db.run(query.delete)
+    res
+  }
 }

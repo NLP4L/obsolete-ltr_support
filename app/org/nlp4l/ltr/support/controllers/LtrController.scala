@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit
 import scala.collection.JavaConversions.asScalaBuffer
 import scala.collection.convert.WrapAsScala._
 import scala.concurrent.Await
-import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
@@ -36,13 +35,11 @@ import org.nlp4l.ltr.support.dao.DocFeatureDAO
 import org.nlp4l.ltr.support.dao.LtrfeatureDAO
 import org.nlp4l.ltr.support.dao.LtrannotationDAO
 import org.nlp4l.ltr.support.dao.LtrconfigDAO
-import org.nlp4l.ltr.support.dao.LtrconfigDAO
 import org.nlp4l.ltr.support.dao.LtrmodelDAO
 import org.nlp4l.ltr.support.dao.LtrqueryDAO
 import org.nlp4l.ltr.support.models._
 import org.nlp4l.ltr.support.models.ViewModels._
 import org.nlp4l.ltr.support.models.DbModels._
-import org.nlp4l.ltr.support.models.LtrModels._
 import com.google.inject.name.Named
 import akka.actor.ActorRef
 import akka.pattern.AskableActorRef
@@ -57,7 +54,6 @@ import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.api.mvc.Action
 import play.api.mvc.Controller
 import org.nlp4l.ltr.support.dao.FeatureProgressDAO
-import org.nlp4l.ltr.support.procs.PRankTrainerFactory
 
 class LtrController @Inject()(docFeatureDAO: DocFeatureDAO, 
                              ltrfeatureDAO: LtrfeatureDAO, 
@@ -119,10 +115,16 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
   }
 
   def deleteLtrConfig(ltrid: Int) = Action.async {
-    val clearf = ltrqueryDAO.clearCheckedFlg(ltrid)
-    Await.ready(clearf, scala.concurrent.duration.Duration.Inf)
+    val modelf = ltrmodelDAO.deleteByLtrid(ltrid)
+    Await.result(modelf, scala.concurrent.duration.Duration.Inf)
+    val docff = docFeatureDAO.deleteByLtrid(ltrid)
+    Await.result(docff, scala.concurrent.duration.Duration.Inf)
+    val fdelf = ltrfeatureDAO.deleteByLtrid(ltrid)
+    Await.result(fdelf, scala.concurrent.duration.Duration.Inf)
     val delaf = ltrannotationDAO.deleteByLtrid(ltrid)
     Await.ready(delaf, scala.concurrent.duration.Duration.Inf)
+    val fpf = featureProgressDAO.deleteByLtrid(ltrid)
+    Await.result(fpf, scala.concurrent.duration.Duration.Inf)
     val delqf = ltrqueryDAO.deleteByLtrid(ltrid)
     Await.ready(delqf, scala.concurrent.duration.Duration.Inf)
     val f: Future[Ltrconfig] = ltrconfigDAO.get(ltrid)
@@ -401,6 +403,14 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
   def getTrainingProgress(ltrid: Int, runid: Int) = Action.async {
     val f = pa ? TrainingGetProgressMsg(ltrid, runid)
     f.map(result => Ok(result.toString()))
+  }
+
+  def deleteTraining(ltrid: Int, runid : Int) = Action.async {
+    val fm = ltrmodelDAO.get(ltrid, runid)
+    val ltrmodel: Ltrmodel = Await.result(fm, scala.concurrent.duration.Duration.Inf)
+    val fd: Future[Int] = ltrmodelDAO.delete(ltrmodel.mid.get)
+    Await.ready(fd, scala.concurrent.duration.Duration.Inf)
+    Future.successful(Ok(Json.toJson(ActionResult(true, Seq("success")))))
   }
 
 }
