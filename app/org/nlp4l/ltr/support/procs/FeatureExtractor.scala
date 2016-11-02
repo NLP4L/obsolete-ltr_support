@@ -30,8 +30,7 @@ import org.nlp4l.ltr.support.models.FeatureExtractParameter
 import org.nlp4l.ltr.support.models.FeatureExtractQueries
 import org.nlp4l.ltr.support.models.FeatureExtractResult
 import org.nlp4l.ltr.support.models.FeatureExtractResults
-import org.nlp4l.ltr.support.models.LtrModels.fWFeatureExtractParameterWrites
-import org.nlp4l.ltr.support.models.LtrModels.fWFeatureExtractResultReads
+import org.nlp4l.ltr.support.models.LtrModels._
 
 import akka.actor.ActorRef
 import akka.actor.actorRef2Scala
@@ -54,7 +53,7 @@ class FeatureExtractor(sender: ActorRef) extends FeatureProgressReport {
   
   def execute(dtos: FeatureExtractDTOs) = {  
     // Post the annotated docs and queries
-    val param = FeatureExtractParameter( FeatureExtractQueries(dtos.idField, dtos.dtos ) )
+    val param = FeatureExtractQueries(dtos.idField, dtos.dtos )
     val extractUrl = dtos.featureExtractUrl + s"?command=extract&conf=${dtos.featureExtractConfig}&wt=json"
     val s_req = url(extractUrl).POST
           .setBody(Json.toJson(param).toString())
