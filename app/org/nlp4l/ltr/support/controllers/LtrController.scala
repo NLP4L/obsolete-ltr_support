@@ -382,15 +382,16 @@ class LtrController @Inject()(docFeatureDAO: DocFeatureDAO,
     val ltr = Await.result(f, scala.concurrent.duration.Duration.Inf)
     val runid = ltrmodelDAO.nextRunId(ltrid)
     val feature_list = request.getQueryString("features").get
-    val ltrmodel: Ltrmodel = Ltrmodel(None,ltrid,runid,feature_list,None,0,0,"",Some(new DateTime()),None)
-    val fm: Future[Ltrmodel] = ltrmodelDAO.insert(ltrmodel)
-    val newModel = Await.result(fm, scala.concurrent.duration.Duration.Inf)
 
     val ff = ltrfeatureDAO.fetchByLtrid(ltrid)
     val featureList: Seq[Ltrfeature] = Await.result(ff, scala.concurrent.duration.Duration.Inf).sortBy(_.fid)
     val selected: Array[Int] = feature_list.split(",").map(f => f.toInt)
     val selectedFeatureList = featureList.filter(f => selected.contains(f.fid.get))
 
+    val modelFeatureList = Json.prettyPrint(Json.obj("features" -> selectedFeatureList.map(_.name)))
+    val ltrmodel: Ltrmodel = Ltrmodel(None,ltrid,runid,modelFeatureList,None,0,0,"",Some(new DateTime()),None)
+    val fm: Future[Ltrmodel] = ltrmodelDAO.insert(ltrmodel)
+    val newModel = Await.result(fm, scala.concurrent.duration.Duration.Inf)
     val fd = docFeatureDAO.fetchByFids(ltrid, selected)
     val docFeatures: Seq[DocFeature] = Await.result(fd, scala.concurrent.duration.Duration.Inf)
 

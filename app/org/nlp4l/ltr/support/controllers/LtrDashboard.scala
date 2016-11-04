@@ -19,7 +19,6 @@ package org.nlp4l.ltr.support.controllers
 import scala.concurrent.Await
 import scala.util.Failure
 import scala.util.Success
-
 import org.nlp4l.ltr.support.dao.DocFeatureDAO
 import org.nlp4l.ltr.support.dao.FeatureProgressDAO
 import org.nlp4l.ltr.support.dao.LtrannotationDAO
@@ -32,9 +31,10 @@ import org.nlp4l.ltr.support.models.Ltrfeature
 import org.nlp4l.ltr.support.models.Ltrmodel
 import org.nlp4l.ltr.support.models.Ltrquery
 import org.nlp4l.ltr.support.models.Menubar
-
 import javax.inject.Inject
 import javax.inject.Singleton
+
+import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.Action
 import play.api.mvc.Controller
 
@@ -159,9 +159,9 @@ class LtrDashboard @Inject()(docFeatureDAO: DocFeatureDAO,
     val features: Seq[Ltrfeature] = Await.result(ff, scala.concurrent.duration.Duration.Inf)
     val fm = ltrmodelDAO.get(mid)
     val ltrmodel: Ltrmodel = Await.result(fm, scala.concurrent.duration.Duration.Inf)
-    val selected: Array[Int] = ltrmodel.feature_list.split(",").map(f => f.toInt)
-    val featuresSelected = features.map(f => (f, selected.contains(f.fid.get)))
-    Ok(org.nlp4l.ltr.support.views.html.trainingStatus(ltrid,menubars,ltr,ltrmodels,featuresSelected,ltrmodel,"",""))
+    val json: JsValue = Json.parse(ltrmodel.feature_list)
+    val featureList = (json \ "features").as[Seq[JsValue]].map(_.as[String])
+    Ok(org.nlp4l.ltr.support.views.html.trainingStatus(ltrid,menubars,ltr,ltrmodels,featureList,ltrmodel,"",""))
   }
 
   private def buildMenubars(ltrid: Int): Seq[Menubar] = {

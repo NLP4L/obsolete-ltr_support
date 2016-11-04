@@ -177,7 +177,7 @@
           		<div class="form-group">
           			<label class="col-sm-2 control-label" for="deployerFactoryClassSettings">- settings</label>
           			<div class="col-sm-10">
-          				<textarea class="form-control" id="deployerFactoryClassSettings" rows="1" />@ltr.map(d => d.deployerFactoryClassSettings).getOrElse("{ \"deployToUrl\": \"http://localhost:8983/solr/nlp4l/receive/file\", \"deployToFile\": \"ltr_model.json\" }")</textarea>
+          				<textarea class="form-control" id="deployerFactoryClassSettings" rows="1" />@ltr.map(d => d.deployerFactoryClassSettings).getOrElse("{ \"deployToUrl\": \"http://localhost:8983/solr/nlp4l/receive/file\", \"deployToFile\": \"collection1/conf/ltr_model.conf\" }")</textarea>
           			</div>
           		</div>
           	</div><!-- row -->
