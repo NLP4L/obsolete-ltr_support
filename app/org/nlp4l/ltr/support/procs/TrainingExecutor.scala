@@ -48,7 +48,7 @@ class TrainingExecutor(sender: ActorRef) extends TrainingProgressReport {
 
       val constructor = Class.forName(trainingRequest.ltrconfig.trainerFactoryClassName).getConstructor(classOf[Config])
       val factory = constructor.newInstance(config).asInstanceOf[TrainerFactory]
-      val trainer = factory.getInstance()
+      val trainer = factory.getInstance().asInstanceOf[PointwiseTrainer]
       val progressSender = new TrainingProgressSender(sender, trainingRequest.ltrid, trainingRequest.runid)
 
       val result = trainer.train(featureNames, features, labels, trainingRequest.ltrconfig.labelMax + 1, progressSender)

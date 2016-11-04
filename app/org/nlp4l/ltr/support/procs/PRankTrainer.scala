@@ -29,7 +29,7 @@ class PRankTrainerFactory(settings: Config) extends TrainerFactory(settings: Con
   }
 }
 
-class PRankTrainer(val loopCount: Int) extends Trainer  {
+class PRankTrainer(val loopCount: Int) extends PointwiseTrainer  {
 
   private val logger = Logger(this.getClass)
 

@@ -27,12 +27,18 @@ abstract class TrainerFactory(settings: Config) extends ConfiguredFactory(settin
   def getInstance(): Trainer
 }
 
-trait Trainer {
+trait Trainer {}
+
+trait PointwiseTrainer extends Trainer {
   def train(featureNames: Array[String],
             features: Array[Vector[Float]],
             labels: Array[Int],
             maxLabel: Int,
             progress: TrainingProgress) : String
+}
+
+trait PairwiseTrainer extends Trainer {
+  // TBD
 }
 
 trait TrainingProgress {

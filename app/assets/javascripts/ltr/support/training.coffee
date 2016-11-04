@@ -44,7 +44,7 @@ $ ->
         type: 'DELETE',
         async: false,
         success: (data) ->
-            jump = '/ltrdashboard/' + ltrid + '/training/new'
+            jump = '/ltrdashboard/' + ltrid + '/training'
             location.replace(jump)
     return
 
