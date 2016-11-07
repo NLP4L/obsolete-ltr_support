@@ -41,6 +41,24 @@ trait PairwiseTrainer extends Trainer {
   // TBD
 }
 
+abstract class  PseudoPairwiseTrainer extends PointwiseTrainer {
+  def train(featureNames: Array[String],
+            features: Array[Vector[Float]],
+            labels: Array[Int],
+            maxLabel: Int,
+            progress: TrainingProgress) : String = {
+    val labeledPoint = features.zipWithIndex.map{ case (v,i) => (labels(i), v) }.toVector
+    progress.report(10)
+    val model_data = train(featureNames, labeledPoint, progress)
+    progress.report(100)
+    model_data
+  }
+  def train(featureNames: Array[String],
+            labeledPoint: Vector[(Int, Vector[Float])],
+            progress: TrainingProgress) : String
+}
+
+
 trait TrainingProgress {
   def report(progress: Int)
 }

@@ -3,9 +3,6 @@ package org.nlp4l.ltr.support.procs
 import akka.actor.ActorRef
 import com.typesafe.config.ConfigFactory
 import org.junit.runner.RunWith
-import org.nlp4l.ltr.support.actors.TrainingSetProgressMsg
-import org.nlp4l.ltr.support.models.LtrModels._
-import org.nlp4l.ltr.support.procs.PRankTrainerFactory
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 
@@ -44,9 +41,14 @@ class TrainerSpec extends Specification {
       prank.test(Vector(12F, 4F))
 
       val factory = new PRankTrainerFactory(ConfigFactory.empty())
-      val trainer = factory.getInstance()
+      val trainer = factory.getInstance().asInstanceOf[PointwiseTrainer]
       val result = trainer.train(featureNames, features, labels, maxLabel, new TestTrainingProgressSender())
       result != ""
+      //
+      val factory2 = new RankingSVMTrainerFactory(ConfigFactory.empty())
+      val trainer2 = factory2.getInstance().asInstanceOf[PointwiseTrainer]
+      val result2 = trainer2.train(featureNames, features, labels, maxLabel, new TestTrainingProgressSender())
+      result2 != ""
     }
 
   }

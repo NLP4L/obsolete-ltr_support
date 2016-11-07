@@ -22,6 +22,8 @@ libraryDependencies ++= Seq(
   "org.apache.lucene" % "lucene-backward-codecs" % "5.4.1",
   "org.apache.solr" % "solr-solrj" % "5.4.1",
   "org.apache.opennlp" % "opennlp-tools" % "1.6.0",
+  "org.apache.spark" %% "spark-core" % "1.6.1" exclude("org.slf4j", "slf4j-log4j12"),
+  "org.apache.spark" %% "spark-mllib" % "1.6.1",
   "com.jsuereth" %% "scala-arm" % "1.4",
   "org.webjars" %% "webjars-play" % "2.4.0-1",
   "org.webjars" % "bootstrap" % "3.3.5",
@@ -31,6 +33,10 @@ libraryDependencies ++= Seq(
   "net.databinder.dispatch" %% "dispatch-core" % "0.11.3"
 )
 
+dependencyOverrides ++= Set(
+  // Spark is expecting jackson-databind 2.4.4
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.4.4"
+)
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 

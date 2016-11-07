@@ -25,11 +25,11 @@ import play.api.libs.json.{Json}
 
 class PRankTrainerFactory(settings: Config) extends TrainerFactory(settings: Config) {
   def getInstance(): Trainer = {
-    new PRankTrainer(getIntParam("loopCount", 10000))
+    new PRankTrainer(getIntParam("numIterations", 10000))
   }
 }
 
-class PRankTrainer(val loopCount: Int) extends PointwiseTrainer  {
+class PRankTrainer(val numIterations: Int) extends PointwiseTrainer  {
 
   private val logger = Logger(this.getClass)
 
@@ -42,8 +42,8 @@ class PRankTrainer(val loopCount: Int) extends PointwiseTrainer  {
     logger.info("featureNames: " + featureNames.toSeq)
     logger.info("maxLabel: " + maxLabel)
     logger.info("labels length: " + labels.length)
-    logger.info("loopCount: " + loopCount)
-    val prank = new PRank(features, labels, featureNames.length, maxLabel, loopCount, progress)
+    logger.info("numIterations: " + numIterations)
+    val prank = new PRank(features, labels, featureNames.length, maxLabel, numIterations, progress)
     val wb = prank.train()
     val weights = for(e <- featureNames.zipWithIndex) yield Json.obj("name" -> e._1, "weight" -> wb._1(e._2))
     val bs = Json.toJson(wb._2)

@@ -33,6 +33,11 @@
   <logger name="akka" level="INFO" />
   <logger name="org.nlp4l" level="DEBUG" />
 
+  <logger name="org.apache.spark" level="WARN" />
+  <logger name="org.spark-project" level="WARN" />
+  <logger name="org.apache.hadoop" level="WARN" />
+  <logger name="org.apache.parquet.hadoop" level="WARN" />
+
   <root level="INFO">
     <appender-ref ref="STDOUT" />
   </root>
