@@ -25,7 +25,7 @@ import play.api.libs.json.{Json}
 
 class PRankTrainerFactory(settings: Config) extends TrainerFactory(settings: Config) {
   def getInstance(): Trainer = {
-    new PRankTrainer(getIntParam("numIterations", 10000))
+    new PRankTrainer(getIntParam("numIterations", 2000))
   }
 }
 

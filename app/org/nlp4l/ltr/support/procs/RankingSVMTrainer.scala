@@ -28,7 +28,7 @@ import play.api.libs.json.Json
 
 class RankingSVMTrainerFactory(settings: Config) extends TrainerFactory(settings: Config) {
   def getInstance(): Trainer = {
-    new RankingSVMTrainer(getIntParam("numIterations", 1000))
+    new RankingSVMTrainer(getIntParam("numIterations", 2000))
   }
 }
 
