@@ -73,6 +73,7 @@ class PRank(x: Array[Vector[Float]], y: Array[Int], featureNum: Int, maxLabel: I
 
   def train(): (Vector[Float], Vector[Float]) = {
     for(t <- Range(1, loopCount)){
+//      val t0 = t % x.size
       val t0 = r.nextInt(x.size)
       val predictY = predict(0, weight(x(t0)))
       if(predictY != y(t0)){
