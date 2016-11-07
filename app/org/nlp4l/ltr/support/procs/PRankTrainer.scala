@@ -62,7 +62,7 @@ class PRankTrainer(val numIterations: Int) extends PointwiseTrainer  {
   }
 }
 
-class PRank(x: Array[Vector[Float]], y: Array[Int], featureNum: Int, maxLabel: Int, loopCount: Int, progress: TrainingProgress) {
+class PRank(x: Array[Vector[Float]], y: Array[Int], featureNum: Int, maxLabel: Int, numIterations: Int, progress: TrainingProgress) {
 
   var w: Vector[Float] = Vector.fill(featureNum)(0F)
   val b: Array[Float] = Array.fill(maxLabel)(0F)
@@ -72,8 +72,7 @@ class PRank(x: Array[Vector[Float]], y: Array[Int], featureNum: Int, maxLabel: I
   val r = scala.util.Random
 
   def train(): (Vector[Float], Vector[Float]) = {
-    for(t <- Range(1, loopCount)){
-//      val t0 = t % x.size
+    for(t <- Range(1, numIterations)){
       val t0 = r.nextInt(x.size)
       val predictY = predict(0, weight(x(t0)))
       if(predictY != y(t0)){
@@ -90,8 +89,8 @@ class PRank(x: Array[Vector[Float]], y: Array[Int], featureNum: Int, maxLabel: I
           b(r - 1) = b(r - 1) - tau(r - 1)
         }
       }
-      if (t % (loopCount / 100) == 0) {
-        progress.report(t / (loopCount / 100))
+      if (t % (numIterations / 100) == 0) {
+        progress.report(t / (numIterations / 100))
       }
     }
     progress.report(100)
