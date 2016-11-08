@@ -22,8 +22,8 @@ class LtrModelsSpec extends Specification {
     val param: FeatureExtractParameter = FeatureExtractParameter( FeatureExtractQueries(dtos.idField, dtos.dtos ) )
     val expected1 = """{"qid":1,"query":"あああ","docs":["いいい","ううう"]}"""
     val expected2 = """{"queries":[{"qid":1,"query":"あああ","docs":["いいい","ううう"]},{"qid":2,"query":"ううう","docs":["えええ","ううう"]}]}"""
-    val expected3 = """data:{"idField":"id","queries":[{"qid":1,"query":"あああ","docs":["いいい","ううう"]},{"qid":2,"query":"ううう","docs":["えええ","ううう"]}]}}"""
-    
+    val expected3 = """{"data":{"idField":"ccc","queries":[{"qid":1,"query":"あああ","docs":["いいい","ううう"]},{"qid":2,"query":"ううう","docs":["えええ","ううう"]}]}}"""
+
     "fWFeatureExtractDTOWrites return a dto json" in {
       val result = Json.toJson(dto1).toString();
       result == expected1
