@@ -37,30 +37,38 @@ class RankingSVMTrainer(val numIterations: Int) extends PseudoPairwiseTrainer  {
   private val logger = Logger(this.getClass)
 
   def train(featureNames: Array[String],
-            labeledPoint: Vector[(Int, Vector[Float])],
+            features: Vector[Vector[(Int, Vector[Float])]],
             progress: TrainingProgress) : String = {
     logger.info("train start.")
     logger.info("featureNames: " + featureNames.toSeq)
     logger.info("numIterations: " + numIterations)
 
-    val data = labeledPoint.map { data => LabeledPoint(data._1.toDouble, Vectors.dense(data._2.map(_.toDouble).toArray)) }
+    val dataSet: Vector[Vector[LabeledPoint]] = features.map(_.map { data => LabeledPoint(data._1.toDouble, Vectors.dense(data._2.map(_.toDouble).toArray)) })
 
-    val combi2 = data.combinations(2)
-
-    val trainingData: Iterator[LabeledPoint] = combi2.filterNot(a => a(0).label == a(1).label).map{ a =>
-      if(a(0).label > a(1).label){
-        val vector = Vectors.dense((a(0).features.toArray zip a(1).features.toArray).map{ a => a._1 - a._2 })
-        new LabeledPoint(1, vector)
+    val trainingData: Vector[LabeledPoint] = dataSet.flatMap {
+      data => {
+        val combi2 = data.combinations(2)
+        val pairwiseData = combi2.filterNot(a => a(0).label == a(1).label).map { a =>
+          if (a(0).label > a(1).label) {
+            val vector = Vectors.dense((a(0).features.toArray zip a(1).features.toArray).map { a => a._1 - a._2 })
+            new LabeledPoint(1, vector)
+          }
+          else {
+            val vector = Vectors.dense((a(0).features.toArray zip a(1).features.toArray).map { a => a._2 - a._1 })
+            new LabeledPoint(1, vector)
+          }
+        }
+        pairwiseData
       }
-      else{
-        val vector = Vectors.dense((a(0).features.toArray zip a(1).features.toArray).map{ a => a._2 - a._1 })
-        new LabeledPoint(1, vector)
-      }
+    }
+    progress.report(10)
+    if (logger.isDebugEnabled) {
+      logger.debug("trainingData: size=" + trainingData.size + "\n" + trainingData.map( lp => (lp.label + " " + lp.features)).mkString("\n"))
     }
 
     val sc = SparkContextLocal.newSparkContext("RankingSVMTrainer")
     val model = try {
-      SVMWithSGD.train(sc.makeRDD(trainingData.toSeq), numIterations)
+      SVMWithSGD.train(sc.makeRDD(trainingData), numIterations)
     }
     finally {
       if (sc != null)
@@ -78,6 +86,7 @@ class RankingSVMTrainer(val numIterations: Int) extends PseudoPairwiseTrainer  {
     )
     val jsonText = Json.prettyPrint(jsonObj)
     logger.info("train end." + "\n" + jsonText)
+    progress.report(100)
     jsonText
   }
 }

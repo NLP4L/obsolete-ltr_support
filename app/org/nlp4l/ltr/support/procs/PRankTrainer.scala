@@ -58,6 +58,7 @@ class PRankTrainer(val numIterations: Int) extends PointwiseTrainer  {
     )
     val jsonText = Json.prettyPrint(jsonObj)
     logger.info("train end." + "\n" + jsonText)
+    progress.report(100)
     jsonText
   }
 }
@@ -93,7 +94,6 @@ class PRank(x: Array[Vector[Float]], y: Array[Int], featureNum: Int, maxLabel: I
         progress.report(t / (numIterations / 100))
       }
     }
-    progress.report(100)
     (w, b.take(b.size-1).toVector)
   }
 

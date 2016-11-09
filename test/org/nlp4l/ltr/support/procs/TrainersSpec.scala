@@ -45,9 +45,10 @@ class TrainerSpec extends Specification {
       val result = trainer.train(featureNames, features, labels, maxLabel, new TestTrainingProgressSender())
       result != ""
       //
+      val features2 = features.zipWithIndex.map{ case(f, i) => (labels(i), f) }.toVector
       val factory2 = new RankingSVMTrainerFactory(ConfigFactory.empty())
-      val trainer2 = factory2.getInstance().asInstanceOf[PointwiseTrainer]
-      val result2 = trainer2.train(featureNames, features, labels, maxLabel, new TestTrainingProgressSender())
+      val trainer2 = factory2.getInstance().asInstanceOf[PseudoPairwiseTrainer]
+      val result2 = trainer2.train(featureNames, Vector(features2), new TestTrainingProgressSender())
       result2 != ""
     }
 
